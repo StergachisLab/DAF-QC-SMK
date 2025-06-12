@@ -33,3 +33,8 @@ pixi run --manifest-path /path/to/snakemake/pixi.toml snakemake ...
 where you update `/path/to/snakemake/pixi.toml` to the path of the `pixi.toml` you cloned.
 
 And in place of `...` use all the normal Snakemake arguments for your workflow.
+
+
+## Acknowledgements
+
+Thank you to Mitchell Vollger for providing the template for this Snakemake workflow. 
