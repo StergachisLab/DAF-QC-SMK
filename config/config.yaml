@@ -1,1 +1,2 @@
-sample: "a"
+ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa # path to a reference fasta
+manifest: config/config.tbl # table with samples to process

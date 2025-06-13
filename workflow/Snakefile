@@ -1,11 +1,19 @@
+import pandas as pd
+import os
 from snakemake.utils import min_version
 
 min_version("8.0")
 
 
+
 include: "rules/common.smk"
+
+REF = get_ref()
+MANIFEST = get_manifest()
+
+include: "rules/rules.smk"
 
 
 rule all:
     input:
-        [],
+        expand(rules.align.output, sm=MANIFEST.index)

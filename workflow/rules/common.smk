@@ -1,16 +1,21 @@
-def get_mem_mb(wildcards, attempt):
-    if attempt < 3:
-        return attempt * 1024 * 8
-    return attempt * 1024 * 16
+def get_ref():
+    if "ref" not in config:
+        raise ValueError("FIRE: ref parameter is missing in config.yaml")
+    ref = config["ref"]
+    if not os.path.exists(ref):
+        raise ValueError(f"FIRE: reference file {ref} does not exist")
+    return os.path.abspath(ref)
 
+def get_manifest():
+    manifest = config.get("manifest")
+    if manifest is None:
+        raise ValueError("manifest parameter is missing in config.yaml")
+    if not os.path.exists(manifest):
+        raise ValueError(f"Manifest file {manifest} does not exist")
+    manifest = pd.read_csv(config["manifest"], sep=r"\s+", comment="#").set_index(
+        "sample"
+    )
+    return manifest
 
-# Basic rules needed
-# Align bam, if align is true
-# Targeting metrics- per target % of reads, all targets % of reads, metrics for full length reads
-# Mutation rate metrics, output C,G, or other strand designation
-# Deduplication
-# Targeting metrics for deduplicated files
-# Mutation rate metrics for deduplicated files
-
-# Later, consensus generation. For now, this should not be included by default
-# Consensus sequence bam generation- filter for just full-length and C>T/G>A designated strands. Use MSA to generate a consensus. Map consensus. 
+def get_input_bam(wc):
+    return MANIFEST.loc[wc.sm, "bam"]

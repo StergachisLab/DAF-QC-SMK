@@ -1,0 +1,9 @@
+name: commandline
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - samtools==1.19.1
+  - minimap2
+  - pbmarkdup=1.2.0
