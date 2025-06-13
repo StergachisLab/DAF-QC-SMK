@@ -37,4 +37,4 @@ And in place of `...` use all the normal Snakemake arguments for your workflow.
 
 ## Acknowledgements
 
-Thank you to Mitchell Vollger for providing the template for this Snakemake workflow. 
+Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and for common functions borrowed from here workflow/rules/common.smk
