@@ -1,3 +1,6 @@
+TODO: Make sure that pbmarkdup retains unmapped and supplementary reads
+
+
 # \<your workflow name\>
 
 [![Actions Status](https://github.com/mrvollger/SmkTemplate/workflows/CI/badge.svg)](https://github.com/mrvollger/SmkTemplate/actions)
