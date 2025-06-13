@@ -17,5 +17,19 @@ def get_manifest():
     )
     return manifest
 
+def get_dup_end_length():
+    if "dup_end_length" not in config:
+        dup_end_length = 8000
+    else:
+        dup_end_length=config["dup_end_length"]
+    return dup_end_length
+
+def get_min_id_perc():
+    if "min_id_perc" not in config:
+        min_id_perc = 99.2
+    else:
+        min_id_perc=config["min_id_perc"]
+    return min_id_perc
+
 def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
