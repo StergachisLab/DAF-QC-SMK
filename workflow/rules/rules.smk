@@ -1,9 +1,33 @@
 # Basic rules
+
+rule deduplicate:
+    input:
+        data= get_input_bam
+    params:
+        dup_end_len=DUP_END_LENGTH,
+        min_id=MIN_ID_PERC
+    conda:
+        "../envs/cmd.yaml"
+    output:
+        dedup_bam=temp("temp/{sm}/align/{sm}.dupmark.bam"),
+        dup_index=temp("temp/{sm}/align/{sm}.dupmark.bam.bai")
+    log:
+        "logs/{sm}/dedup/{sm}.dedup.log"
+    threads: 8
+    shell:
+        """
+        mkdir -p temp/{wildcards.sm}/align logs/{wildcards.sm}/dedup && \
+        pbmarkdup -j {threads} --end-length {params.dup_end_len}  --min-id-perc {params.min_id} --log-file {log} {input} {output.dedup_bam} && \
+        samtools index {output.dedup_bam}
+        """
+    
+
+
 # TODO add option for alignment and check if bam is aligned
 rule align:
     input:
         fa= REF,
-        data= get_input_bam
+        data= "temp/{sm}/align/{sm}.dupmark.bam"
     conda:
         "../envs/cmd.yaml"
     output:
@@ -18,46 +42,6 @@ rule align:
         samtools sort -u > {output.aligned_bam} && \
         samtools index {output.aligned_bam}
         """
-
-
-rule filter_primary:
-    input:
-        "results/{sm}/align/{sm}.mapped.bam"
-    conda:
-        "../envs/cmd.yaml"
-    output:
-        prim_bam=temp("temp/{sm}/dedup/{sm}.primary.bam"),
-        prim_index=temp("temp/{sm}/dedup/{sm}.primary.bam.bai")
-    threads: 8
-    shell:
-        """
-        mkdir -p temp/{wildcards.sm}/dedup && \
-        samtools view -b -F 2306 {input} > {output.prim_bam} && \
-        samtools index {output.prim_bam}
-        """
-
-# TODO use region-filtered bam?
-rule deduplicate:
-    input:
-        "temp/{sm}/dedup/{sm}.primary.bam"
-    params:
-        dup_end_len=DUP_END_LENGTH,
-        min_id=MIN_ID_PERC
-    conda:
-        "../envs/cmd.yaml"
-    output:
-        dedup_bam="results/{sm}/align/{sm}.dupmark.bam",
-        dup_index="results/{sm}/align/{sm}.dupmark.bam.bai"
-    log:
-        "logs/{sm}/dedup/{sm}.dedup.log"
-    threads: 8
-    shell:
-        """
-        mkdir -p results/{wildcards.sm}/align logs/{wildcards.sm}/dedup && \
-        pbmarkdup -j {threads} --end-length {params.dup_end_len}  --min-id-perc {params.min_id} --cross-library --log-file {log} {input} {output.dedup_bam} && \
-        samtools index {output.dedup_bam}
-        """
-    
 
 # Targeting metrics- per target % of reads, all targets % of reads, metrics for full length reads
 # Mutation rate metrics, output C,G, or other strand designation
