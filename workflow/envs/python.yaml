@@ -1,0 +1,9 @@
+name: python
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+dependencies:
+  - pysam==0.23.3
+  - numpy==1.24 # use this version to avoid cxx errors
+  - pandas==1.4 # pandas versions later than this have cxx errors

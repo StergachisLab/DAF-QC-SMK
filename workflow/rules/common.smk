@@ -33,3 +33,6 @@ def get_min_id_perc():
 
 def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
+
+def get_input_regs(wc):
+    return MANIFEST.loc[wc.sm, "regs"]

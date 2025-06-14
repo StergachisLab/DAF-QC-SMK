@@ -24,6 +24,7 @@ rule deduplicate:
 
 
 # TODO add option for alignment and check if bam is aligned
+# Output this as a CRAM file instead
 rule align:
     input:
         fa= REF,
@@ -42,6 +43,20 @@ rule align:
         samtools sort -u > {output.aligned_bam} && \
         samtools index {output.aligned_bam}
         """
+
+rule sequence_qc:
+    input:
+        data="results/{sm}/align/{sm}.mapped.bam"
+    params:
+        regions=get_input_regs
+    output:
+        read_metrics="results/{sm}/qc/{sm}.read_metrics.tbl.gz",
+        summary_metrics="results/{sm}/qc/{sm}.summary_metrics.tbl.gz"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/sequence_metrics.py"
+
 
 # Targeting metrics- per target % of reads, all targets % of reads, metrics for full length reads
 # Mutation rate metrics, output C,G, or other strand designation
