@@ -35,4 +35,16 @@ def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
 
 def get_input_regs(wc):
-    return MANIFEST.loc[wc.sm, "regs"]
+    regions = MANIFEST.loc[wc.sm, "regs"].strip().split(",")
+    return regions
+
+def get_strand_qc_plot_paths():
+    outputs = []
+    for sample in MANIFEST.index:
+        regions = MANIFEST.loc[sample, "regs"].strip().split(",")
+        for region in regions:
+            reg_label = region.replace(":","_").replace("-", "_")
+            prefix = f"results/{sample}/qc/{sample}.{reg_label}"
+            for type in ["deam_rate", "bias", "mut_rate", "strandtype"]:
+                outputs.append(f"{prefix}.{type}.pdf")
+    return outputs

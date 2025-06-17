@@ -1,2 +1,2 @@
-sample	bam
-htt_test	/mmfs1/gscratch/stergachislab/bohaczuk/analysis/chdi-hd/primer-design/25.3.7_vega/HTTLNA_hg38.bam
+sample	bam	regs
+htt_test	/mmfs1/gscratch/stergachislab/bohaczuk/analysis/chdi-hd/primer-design/25.3.7_vega/HTTLNA_reset.bam	chr4:3073138-3075853,chr3:179228176-179236561

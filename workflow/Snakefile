@@ -13,12 +13,15 @@ MANIFEST = get_manifest()
 DUP_END_LENGTH = get_dup_end_length()
 MIN_ID_PERC = get_min_id_perc()
 
+
 include: "rules/rules.smk"
 
 
 rule all:
     input:
         expand(rules.align.output, sm=MANIFEST.index),
-        expand(rules.sequence_qc.output, sm=MANIFEST.index)
-
+        expand(rules.sequence_qc.output, sm=MANIFEST.index),
+        get_strand_qc_plot_paths(),
+        expand(rules.targeting_qc.output, sm=MANIFEST.index),
+        expand(rules.plot_targeting_qc.output, sm=MANIFEST.index)
 #         expand(rules.deduplicate.output, sm=MANIFEST.index),
