@@ -9,8 +9,10 @@ import pandas as pd
 
 bam_path = snakemake.input.data
 regions = snakemake.params.regions
+targeting_metrics = snakemake.input.targeting_data
+chimera_cutoff = snakemake.params.chimera_cutoff
 
-
+#targeting_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/htt_test.detailed_targeting_metrics.tbl.gz"
 
 
 
@@ -18,7 +20,7 @@ regions = snakemake.params.regions
 
 #bam_path= "/mmfs1/gscratch/stergachislab/bohaczuk/analysis/chdi-hd/primer-design/25.3.7_vega/HTTLNA_hg38_with_md.bam"
 #bam_path=f"/gscratch/stergachislab/bohaczuk/data/DAF_processing/chris_PIK3CA_plasmidsaurus/GM12878_{label}_DddA_with_MD.bam"
-#region="chr4:3073071-3076052"
+#regions=["chr4:3073138-3075853", "chr3:179228176-179236561"]
 #chrom='chr3'
 #start= 179228176
 #end= 179236561
@@ -144,24 +146,30 @@ def strand_metrics(read, strand):
 #    return deamination_rate, mutation_rate, seq_len, deamination_pos, doublets
 
 
-    return doublets, mutation_count
+    return doublets, mutation_count, deamination_pos
 # output read name, strand designation, AC_count, AC_deam, CC_count, CC_deam, GC_count, GC_deam, TC_count, TC_deam, OC_count, OC_deam, mutation_count, read_len
 
 
-def strand_metrics_table (psfile, chrom, start, end):
+def strand_metrics_table (psfile, chrom, start, end, chimera_cutoff=0.9, include_readnames=None):
     # psfile should be pysam alignment file
+    # include_readnames is a list of read names to include, if None all reads are included
     
     read_collector=[]
+    
+	# If a read filter is applied, 
 
     # check that this region has reads
     if psfile.count(chrom, start, end) == 0:
         return pd.DataFrame()
 
     for read in psfile.fetch(chrom, start, end):
+        if include_readnames is not None and read.query_name not in include_readnames:
+            continue
         if read.is_secondary or read.is_supplementary:
             continue
 
-        strand = determine_da_strand(read)
+        strand = determine_da_strand(read, chimera_cutoff)
+        duplicate = read.get_tag('du') if read.has_tag('du') else "None"
 
         read_data = {           
             'read_name': read.query_name, 
@@ -170,19 +178,22 @@ def strand_metrics_table (psfile, chrom, start, end):
             'end': end, 
             'length': len(read.query_sequence),
             'strand': strand,
+            'duplicate' : duplicate
         }
         
 
 
         if strand in ['CT', 'GA']:
-            doublets, mutation_count = strand_metrics(read, strand)
+            doublets, mutation_count, deam_pos = strand_metrics(read, strand)
             read_data['mutation_count'] = mutation_count
+            read_data['deamination_positions'] = deam_pos
             for key in ['AC', 'CC', 'GC', 'TC', 'OC']:
                 read_data[f'{key}_count'] = doublets[key][0]
                 read_data[f'{key}_deam'] = doublets[key][1]
                 read_data[f'{key}_deam_rate'] = doublets[key][1]/doublets[key][0] if doublets[key][0] > 0 else None
         else:
             read_data['mutation_count'] = None
+            read_data['deamination_positions'] = None
             for key in ['AC', 'CC', 'GC', 'TC', 'OC']:
                 read_data[f'{key}_count'] = None
                 read_data[f'{key}_deam'] = None
@@ -241,11 +252,26 @@ def aggregate_strand_metrics(table):
 
 pybam=pysam.AlignmentFile(bam_path, 'rb')
 
+targeting_df = pd.read_csv(targeting_metrics, sep='\t', compression='gzip')
+
+
+
+
+
 tables=[]
 
 for region in regions:
+    
     chrom, start, end = parse_region(region)
-    reg_table=strand_metrics_table(pybam, chrom, start, end)
+
+    full_length_reads = targeting_df[(targeting_df['chrom'] == chrom) & (targeting_df['start'] == start) & (targeting_df['end'] == end)]['full_length_reads'].values
+
+    if full_length_reads is None or full_length_reads[0] is np.nan or len(full_length_reads) == 0:
+        continue
+
+    full_length_reads = full_length_reads[0].split(',')
+#    print (f"Region {region} has {len(full_length_reads)} full length reads")
+    reg_table=strand_metrics_table(pybam, chrom, start, end, include_readnames=full_length_reads)
 
     tables.append(reg_table)
 table=pd.concat(tables, ignore_index=True)
@@ -256,8 +282,9 @@ aggregate_table=aggregate_strand_metrics(table)
 
 # save tables
 for column in ['mutation_rate', 'all_deam_rate', 'AC_deam_rate', 'CC_deam_rate', 'GC_deam_rate', 'TC_deam_rate', 'OC_deam_rate']:
-    table[column] = table[column].apply(lambda x: ','.join(map(str, x)) if isinstance(x, list) else '')
     aggregate_table[column] = aggregate_table[column].apply(lambda x: ','.join(map(str, x)) if isinstance(x, list) else '')
+    
+table['deamination_positions'] = table['deamination_positions'].apply(lambda x: ','.join(map(str, x)) if isinstance(x, list) else '')
 
 table.to_csv(snakemake.output.read_metrics, sep='\t', index=False, compression='gzip')
 aggregate_table.to_csv(snakemake.output.summary_metrics, sep='\t', index=False, compression='gzip')

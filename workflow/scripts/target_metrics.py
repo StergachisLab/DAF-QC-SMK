@@ -50,7 +50,7 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
         map_end_diff = map_end - end
 #        print("map start", map_start, "map end", map_end, "start", start, "end", end, "diffs", map_start_diff, map_end_diff)
 
-        if abs(map_start_diff) > tolerance and abs(map_end_diff) > tolerance:
+        if abs(map_start_diff) > tolerance or abs(map_end_diff) > tolerance:
             non_full_length_reads_map.append(read.query_name)
             continue
 

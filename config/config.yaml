@@ -2,3 +2,5 @@ ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa # path to a re
 manifest: config/config.tbl # table with samples to process. bam files should only include reads from a single PCR amplification.
 dup_end_length: 8000 # length to consider for deduplication
 dup_min_id_perc: 99.2 # minimum identity percentage required to mark duplicates
+chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a top or bottom strand designation (i.e. non-chimeric)
+

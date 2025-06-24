@@ -31,6 +31,13 @@ def get_min_id_perc():
         min_id_perc=config["min_id_perc"]
     return min_id_perc
 
+def get_chimera_cutoff():
+    if "chimera_cutoff" not in config:
+        chimera_cutoff = 0.9
+    else:
+        chimera_cutoff=config["chimera_cutoff"]
+    return chimera_cutoff
+
 def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
 
@@ -45,6 +52,18 @@ def get_strand_qc_plot_paths():
         for region in regions:
             reg_label = region.replace(":","_").replace("-", "_")
             prefix = f"results/{sample}/qc/{sample}.{reg_label}"
-            for type in ["deam_rate", "bias", "mut_rate", "strandtype"]:
-                outputs.append(f"{prefix}.{type}.pdf")
+            for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
+                for type in ["reads"]:
+                    outputs.append(f"{prefix}.{plot}.{type}.pdf")
+    return outputs
+
+def get_deduplication_qc_plot_paths():
+    outputs = []
+    for sample in MANIFEST.index:
+        regions = MANIFEST.loc[sample, "regs"].strip().split(",")
+        for region in regions:
+            reg_label = region.replace(":","_").replace("-", "_")
+            prefix = f"results/{sample}/qc/{sample}.{reg_label}"
+            for level in ["reads", "groups"]:
+                outputs.append(f"{prefix}.duplication_{level}.pdf")
     return outputs
