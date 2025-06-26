@@ -19,6 +19,14 @@ pixi install
 
 `pixi` handles the execution of the Snakemake workflows:
 
+## I have been running it with the following. The options below should also work but have not yet been tested.
+```
+pixi shell
+snakemake --configfile config/config.yaml
+```
+
+
+## Also probably works:
 ```bash
 pixi run snakemake ...
 ```
