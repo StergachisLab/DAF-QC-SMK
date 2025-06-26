@@ -38,6 +38,30 @@ def get_chimera_cutoff():
         chimera_cutoff=config["chimera_cutoff"]
     return chimera_cutoff
 
+def get_consensus_min_reads():
+    if "consensus_min_reads" not in config:
+        consensus_min_reads = 3
+    else:
+        consensus_min_reads=config["consensus_min_reads"]
+    return consensus_min_reads
+
+def get_platform():
+    if "platform" not in config:
+        platform = "pacbio"
+    else:
+        platform = config["platform"]
+    return platform
+
+def get_consensus():
+    if "consensus" not in config:
+        consensus = True
+    else:
+        consensus = config["consensus"]
+    return consensus
+
+def get_is_fastq():
+    return config["is_fastq"]
+
 def get_input_bam(wc):
     return MANIFEST.loc[wc.sm, "bam"]
 

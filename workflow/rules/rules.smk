@@ -1,5 +1,4 @@
 # Basic rules
-
 rule deduplicate:
     input:
         data= get_input_bam
@@ -22,26 +21,51 @@ rule deduplicate:
         """
     
 
-
+if PLATFORM == "pacbio":
 # TODO add option for alignment and check if bam is aligned
 # Output this as a CRAM file instead
-rule align:
-    input:
-        fa= REF,
-        data= "temp/{sm}/align/{sm}.dupmark.bam"
-    conda:
-        "../envs/cmd.yaml"
-    output:
-        aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
-        index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
-    threads: 8
-    shell:
-        """
-        mkdir -p results/{wildcards.sm}/align && \
-        minimap2 -t {threads} --MD --secondary=no -Y -y -a -x map-pb  {input.fa} <(samtools fastq -T "*" {input.data}) |\
-        samtools sort -u > {output.aligned_bam} && \
-        samtools index {output.aligned_bam}
-        """
+    rule align:
+        input:
+            fa= REF,
+            data= "temp/{sm}/align/{sm}.dupmark.bam"
+        conda:
+            "../envs/cmd.yaml"
+        output:
+            aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
+            index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
+        threads: 8
+        shell:
+            """
+            mkdir -p results/{wildcards.sm}/align && \
+            minimap2 -t {threads} --MD --secondary=no -Y -y -a -x map-pb  {input.fa} <(samtools fastq -T "*" {input.data}) |\
+            samtools sort > {output.aligned_bam} && \
+            samtools index {output.aligned_bam}
+            """
+
+elif PLATFORM == "ont":
+
+    rule align_ont:
+        input:
+            fa=REF,
+            data=get_input_bam
+        conda:
+            "../envs/cmd.yaml"
+        output:
+            aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
+            index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
+        threads: 8
+        shell:
+            """
+            mkdir -p results/{wildcards.sm}/align && \
+            if [[ "{IS_FASTQ}" == "True" ]]; then
+                minimap2 -t {threads} --MD --secondary=no -Y -y -a -x map-ont  {input.fa} {input.data} |\
+                samtools sort > {output.aligned_bam}
+            else
+                minimap2 -t {threads} --MD --secondary=no -Y -y -a -x map-ont  {input.fa} <(samtools fastq -T "*" {input.data}) |\
+                samtools sort > {output.aligned_bam} 
+            fi && \
+            samtools index {output.aligned_bam}
+            """
 
 rule targeting_qc:
     input:
@@ -168,9 +192,18 @@ rule plot_deduplication_metrics:
 
 
 
-# rule build_consensus
-#    input:
-#       bam="temp/{sm}/align/{sm}.filtered.bam"
+rule build_consensus:
+    input:
+        bam="temp/{sm}/align/{sm}.filtered.bam"
+    params:
+        consensus_min_reads=CONSENSUS_MIN_READS
+    output:
+        bam="temp/{sm}/align/{sm}.consensus.bam"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/build_consensus.py"
+
 # output as temp file, needs to be aligned
 
 # rule align consensus
@@ -187,3 +220,4 @@ rule plot_deduplication_metrics:
 # add rule to save input parameters to smk folder
 # add logs where needed
 # remove read group line from align rule, make align universal for reads and consensus
+# make targeting plot % on targets more clear, fix percent vs fraction issue.

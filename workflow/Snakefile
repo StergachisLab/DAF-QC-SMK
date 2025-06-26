@@ -13,21 +13,57 @@ MANIFEST = get_manifest()
 DUP_END_LENGTH = get_dup_end_length()
 MIN_ID_PERC = get_min_id_perc()
 CHIMERA_CUTOFF = get_chimera_cutoff()
+PLATFORM = get_platform()
+IS_FASTQ = get_is_fastq()
+CONSENSUS = get_consensus()
+CONSENSUS_MIN_READS = get_consensus_min_reads()
 
 
 include: "rules/rules.smk"
 
 
-rule all:
-    input:
-        expand(rules.align.output, sm=MANIFEST.index),
-        expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
-        get_strand_qc_plot_paths(),
-        expand(rules.targeting_qc.output, sm=MANIFEST.index),
-        expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
-        expand(rules.filter_bam.output, sm=MANIFEST.index),
-        expand(rules.decorate_strands.output, sm=MANIFEST.index),
-        expand(rules.index_decorated.output, sm=MANIFEST.index),
-        expand(rules.deduplication_metrics.output, sm=MANIFEST.index),
-        get_deduplication_qc_plot_paths(),
-        expand(rules.deduplicate.output, sm=MANIFEST.index)
+
+if PLATFORM == "ont":
+    rule all:
+        input:
+            expand(rules.align_ont.output, sm=MANIFEST.index),
+            expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
+            get_strand_qc_plot_paths(),
+            expand(rules.targeting_qc.output, sm=MANIFEST.index),
+            expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
+            expand(rules.filter_bam.output, sm=MANIFEST.index),
+            expand(rules.decorate_strands.output, sm=MANIFEST.index),
+            expand(rules.index_decorated.output, sm=MANIFEST.index)
+
+elif CONSENSUS is False:
+    rule all:
+        input:
+            expand(rules.deduplicate.output, sm=MANIFEST.index),
+            expand(rules.align.output, sm=MANIFEST.index),
+            expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
+            get_strand_qc_plot_paths(),
+            expand(rules.targeting_qc.output, sm=MANIFEST.index),
+            expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
+            expand(rules.filter_bam.output, sm=MANIFEST.index),
+            expand(rules.decorate_strands.output, sm=MANIFEST.index),
+            expand(rules.index_decorated.output, sm=MANIFEST.index),
+            expand(rules.deduplication_metrics.output, sm=MANIFEST.index),
+            get_deduplication_qc_plot_paths()
+
+
+else:
+
+    rule all:
+        input:
+            expand(rules.deduplicate.output, sm=MANIFEST.index),
+            expand(rules.align.output, sm=MANIFEST.index),
+            expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
+            get_strand_qc_plot_paths(),
+            expand(rules.targeting_qc.output, sm=MANIFEST.index),
+            expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
+            expand(rules.filter_bam.output, sm=MANIFEST.index),
+            expand(rules.decorate_strands.output, sm=MANIFEST.index),
+            expand(rules.index_decorated.output, sm=MANIFEST.index),
+            expand(rules.deduplication_metrics.output, sm=MANIFEST.index),
+            get_deduplication_qc_plot_paths(),
+            expand(rules.build_consensus.output, sm=MANIFEST.index)

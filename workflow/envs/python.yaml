@@ -8,3 +8,4 @@ dependencies:
   - numpy==1.24 # use this version to avoid cxx errors
   - pandas==1.4 # pandas versions later than this have cxx errors
   - matplotlib==3.10.3
+  - pyabpoa==1.5.4
