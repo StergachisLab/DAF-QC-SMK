@@ -38,8 +38,8 @@ if PLATFORM == "ont":
 elif CONSENSUS is False:
     rule all:
         input:
-            expand(rules.deduplicate.output, sm=MANIFEST.index),
-            expand(rules.align.output, sm=MANIFEST.index),
+#            expand(rules.deduplicate.output, sm=MANIFEST.index),
+            expand(rules.align.output, sm=MANIFEST.index, type="reads"),
             expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
             get_strand_qc_plot_paths(),
             expand(rules.targeting_qc.output, sm=MANIFEST.index),
@@ -55,12 +55,12 @@ else:
 
     rule all:
         input:
-            expand(rules.deduplicate.output, sm=MANIFEST.index),
-            expand(rules.align.output, sm=MANIFEST.index),
-            expand(rules.sequence_qc.output, sm=MANIFEST.index, type="reads"),
+#            expand(rules.deduplicate.output, sm=MANIFEST.index),
+            expand(rules.align.output, sm=MANIFEST.index, type=["reads", "consensus"]),
+            expand(rules.sequence_qc.output, sm=MANIFEST.index, type=["reads", "consensus"]),
             get_strand_qc_plot_paths(),
             expand(rules.targeting_qc.output, sm=MANIFEST.index),
-            expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
+            expand(rules.plot_targeting_qc.output, sm=MANIFEST.index),
             expand(rules.filter_bam.output, sm=MANIFEST.index),
             expand(rules.decorate_strands.output, sm=MANIFEST.index),
             expand(rules.index_decorated.output, sm=MANIFEST.index),

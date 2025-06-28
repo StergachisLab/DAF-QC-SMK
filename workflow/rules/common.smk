@@ -71,14 +71,15 @@ def get_input_regs(wc):
 
 def get_strand_qc_plot_paths():
     outputs = []
+    types = ["reads"] if CONSENSUS is False else ["reads", "consensus"]
     for sample in MANIFEST.index:
         regions = MANIFEST.loc[sample, "regs"].strip().split(",")
         for region in regions:
             reg_label = region.replace(":","_").replace("-", "_")
             prefix = f"results/{sample}/qc/{sample}.{reg_label}"
             for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
-                for type in ["reads"]:
-                    outputs.append(f"{prefix}.{plot}.{type}.pdf")
+                for item in types:
+                    outputs.append(f"{prefix}.{plot}.{item}.pdf")
     return outputs
 
 def get_deduplication_qc_plot_paths():
@@ -91,3 +92,9 @@ def get_deduplication_qc_plot_paths():
             for level in ["reads", "groups"]:
                 outputs.append(f"{prefix}.duplication_{level}.pdf")
     return outputs
+
+def get_targeting_data(wc):
+    if wc.type == "reads":
+        return f"results/{wc.sm}/align/{wc.sm}.mapped.reads.bam"
+    else:
+        return []

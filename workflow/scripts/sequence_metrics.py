@@ -252,28 +252,37 @@ def aggregate_strand_metrics(table):
 
 pybam=pysam.AlignmentFile(bam_path, 'rb')
 
-targeting_df = pd.read_csv(targeting_metrics, sep='\t', compression='gzip')
-
 
 
 
 
 tables=[]
 
-for region in regions:
-    
-    chrom, start, end = parse_region(region)
+if len(targeting_metrics) > 0:
 
-    full_length_reads = targeting_df[(targeting_df['chrom'] == chrom) & (targeting_df['start'] == start) & (targeting_df['end'] == end)]['full_length_reads'].values
+    targeting_df = pd.read_csv(targeting_metrics, sep='\t', compression='gzip')
+    for region in regions:
+        
+        chrom, start, end = parse_region(region)
 
-    if full_length_reads is None or full_length_reads[0] is np.nan or len(full_length_reads) == 0:
-        continue
+        full_length_reads = targeting_df[(targeting_df['chrom'] == chrom) & (targeting_df['start'] == start) & (targeting_df['end'] == end)]['full_length_reads'].values
 
-    full_length_reads = full_length_reads[0].split(',')
-#    print (f"Region {region} has {len(full_length_reads)} full length reads")
-    reg_table=strand_metrics_table(pybam, chrom, start, end, include_readnames=full_length_reads)
+        if full_length_reads is None or full_length_reads[0] is np.nan or len(full_length_reads) == 0:
+            continue
 
-    tables.append(reg_table)
+        full_length_reads = full_length_reads[0].split(',')
+    #    print (f"Region {region} has {len(full_length_reads)} full length reads")
+        reg_table=strand_metrics_table(pybam, chrom, start, end, chimera_cutoff=chimera_cutoff, include_readnames=full_length_reads,)
+
+        tables.append(reg_table)
+
+
+
+else:    
+    for region in regions:
+        chrom, start, end = parse_region(region)
+        reg_table=strand_metrics_table(pybam, chrom, start, end, chimera_cutoff=chimera_cutoff)
+        tables.append(reg_table)
 table=pd.concat(tables, ignore_index=True)
 
 

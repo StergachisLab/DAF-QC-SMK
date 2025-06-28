@@ -27,12 +27,12 @@ if PLATFORM == "pacbio":
     rule align:
         input:
             fa= REF,
-            data= "temp/{sm}/align/{sm}.dupmark.bam"
+            data= "temp/{sm}/align/{sm}.{type}.bam"
         conda:
             "../envs/cmd.yaml"
         output:
-            aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
-            index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
+            aligned_bam="results/{sm}/align/{sm}.mapped.{type}.bam",
+            index="results/{sm}/align/{sm}.mapped.{type}.bam.bai"
         threads: 8
         shell:
             """
@@ -95,7 +95,7 @@ rule plot_targeting_qc:
 rule sequence_qc:
     input:
         data="results/{sm}/align/{sm}.mapped.{type}.bam",
-        targeting_data="results/{sm}/qc/{sm}.detailed_targeting_metrics.tbl.gz"
+        targeting_data=get_targeting_data
     params:
         regions= get_input_regs,
         chimera_cutoff = CHIMERA_CUTOFF
@@ -198,7 +198,7 @@ rule build_consensus:
     params:
         consensus_min_reads=CONSENSUS_MIN_READS
     output:
-        bam="temp/{sm}/align/{sm}.consensus.bam"
+        bam=temp("temp/{sm}/align/{sm}.consensus.bam")
     conda:
         "../envs/python.yaml"
     script:
@@ -206,18 +206,12 @@ rule build_consensus:
 
 # output as temp file, needs to be aligned
 
-# rule align consensus
-# output is aligned consensus.
 
-# Once consensus functionality is added, add to all rule
 
-# As an optional note, can add script on github to decorate the consensus and merge it with the filtered file.
 
-# Later, consensus generation. For now, this should not be included by default
-# Consensus sequence bam generation- filter for just full-length and C>T/G>A designated strands. Use MSA to generate a consensus. Map consensus.
-# Targeting metrics for consensus files
-# Mutation rate metrics for consensus files
+# Targeting metrics for consensus files?
 # add rule to save input parameters to smk folder
 # add logs where needed
-# remove read group line from align rule, make align universal for reads and consensus
 # make targeting plot % on targets more clear, fix percent vs fraction issue.
+# fix start end coordinates in strand metrics to clarify fiber coordinates vs target coordinates
+# As an optional note, can add script on github to decorate the consensus and merge it with the filtered file.
