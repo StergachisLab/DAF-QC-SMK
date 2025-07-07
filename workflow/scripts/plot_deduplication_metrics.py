@@ -9,8 +9,8 @@ output_groups = snakemake.output.duplication_groups
 
 
 
-#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/htt_test.deduplication_metrics.tbl.gz"
-#region = "chr3_179228176_179236561" 
+summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
+region = "chr5_34760400_34763141"
 
 
 summary_metrics = pd.read_csv(summary_path, sep='\t', header=0)
@@ -70,6 +70,7 @@ else:
     weights = [1/len(du_values_reads)] * len(du_values_reads)
     plt.hist(du_values_reads, bins=35, color='blue', alpha=0.7, weights=weights)
     plt.xlim(0, upper_limit)
+    plt.ylim(0, 1.0)
 
     plt.axvline(read_median_duplicates, color='black', linestyle='dashed', linewidth=1, label=f'Median: {read_median_duplicates:.2f}')
     plt.axvline(read_duplicates_10, color='black', linestyle='dashed', linewidth=1, label=f'10th Percentile: {read_duplicates_10:.2f}')
@@ -100,19 +101,20 @@ else:
 
 
     # By group, i.e. only duplicates (group size >1) are considered, and each group has equal weight
-    dups_only = [x for x in du_values if x>1]
+    dup_only = [x for x in du_values if x>1]
 
-    group_median_duplicates = np.median(dups_only) if dups_only else 0
-    group_duplicates_10 = np.percentile(dups_only, 10) if dups_only else 0
-    group_duplicates_90 = np.percentile(dups_only, 90) if dups_only else 0
+    group_median_duplicates = np.median(dup_only) if dup_only else 0
+    group_duplicates_10 = np.percentile(dup_only, 10) if dup_only else 0
+    group_duplicates_90 = np.percentile(dup_only, 90) if dup_only else 0
 
     upper_limit = 150
-    dup_only = [x if x <= upper_limit else upper_limit for x in dups_only]
+    dup_only = [x if x <= upper_limit else upper_limit for x in dup_only]
 
     fig = plt.figure(figsize=(10, 6))
-    weights = [1/len(dups_only)] * len(dups_only)
-    plt.hist(dups_only, bins=35, color='blue', alpha=0.7, weights=weights)
+    weights = [1/len(dup_only)] * len(dup_only)
+    plt.hist(dup_only, bins=35, color='blue', alpha=0.7, weights=weights)
     plt.xlim(0, upper_limit)
+    plt.ylim(0, 1.0)
 
     plt.axvline(group_median_duplicates, color='black', linestyle='dashed', linewidth=1, label=f'Median: {group_median_duplicates:.2f}')
     plt.axvline(group_duplicates_10, color='black', linestyle='dashed', linewidth=1, label=f'10th Percentile: {group_duplicates_10:.2f}')
