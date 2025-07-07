@@ -12,32 +12,26 @@ bam_path = snakemake.input.data
 regions = snakemake.params.regions
 targeting_metrics = snakemake.input.targeting_data
 chimera_cutoff = snakemake.params.chimera_cutoff
+min_deamination_count = snakemake.params.min_deamination_count
 read_metrics = snakemake.output.read_metrics
 summary_metrics = snakemake.output.summary_metrics
 
-#targeting_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/htt_test.detailed_targeting_metrics.tbl.gz"
+# for testing
+#bam_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/align/htt_test.mapped.reads.bam"
+#regions = ["chr4:3073138-3075853", "chr3:179228176-179236561"]
+#targeting_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test.detailed_targeting_metrics.tbl.gz"
+#chimera_cutoff = 0.9
+#min_deamination_count = 50 # minimum number of deaminations to designate a strand (otherwise undetermined)
+#read_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_metrics.tsv.gz"
+#summary_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
 
 
-
-#label = "100k"
-
-#bam_path= "/mmfs1/gscratch/stergachislab/bohaczuk/analysis/chdi-hd/primer-design/25.3.7_vega/HTTLNA_hg38_with_md.bam"
-#bam_path=f"/gscratch/stergachislab/bohaczuk/data/DAF_processing/chris_PIK3CA_plasmidsaurus/GM12878_{label}_DddA_with_MD.bam"
-#regions=["chr4:3073138-3075853", "chr3:179228176-179236561"]
-#chrom='chr3'
-#start= 179228176
-#end= 179236561
-#save = False
-#ref = "/mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa"
-#chrom = 'chr4'
-#start = 3073071
-#end = 3076052
 
 def parse_region(region):
-	# region should be in chr:start-end format
-	chrom, positions = region.split(':')
-	start, end = map(int, positions.split('-'))
-	return chrom, start, end
+    # region should be in chr:start-end format
+    chrom, positions = region.split(':')
+    start, end = map(int, positions.split('-'))
+    return chrom, start, end
 
 
 def determine_da_strand(read, cutoff=0.9): # Modified from Elliott's script
@@ -68,7 +62,7 @@ def determine_da_strand(read, cutoff=0.9): # Modified from Elliott's script
 
     if c+g == 0:
         return('none')
-    elif c+g/total <= cutoff:
+    elif c+g/total <= cutoff or c+g < min_deamination_count:
         return('undetermined')
     elif c/(c+g) >= cutoff:
         return('CT')

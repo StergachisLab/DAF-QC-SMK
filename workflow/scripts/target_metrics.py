@@ -5,6 +5,7 @@ import os
 
 bam_path = snakemake.input.data
 regions = snakemake.params.regions
+end_tolerance = snakemake.params.end_tolerance
 output_detailed = snakemake.output.detailed
 output_summary = snakemake.output.summary
 
@@ -129,7 +130,7 @@ tables = []
 
 for region in regions:
     chrom, start, end = parse_region(region)
-    reg_table = region_metrics_table(pybam, chrom, start, end)
+    reg_table = region_metrics_table(pybam, chrom, start, end, tolerance=end_tolerance)
 
     tables.append(reg_table)
 table = pd.concat(tables, ignore_index=True)

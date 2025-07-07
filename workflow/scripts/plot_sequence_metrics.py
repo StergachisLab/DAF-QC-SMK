@@ -5,15 +5,24 @@ import pandas as pd
 
 summary_path = snakemake.input.summary_metrics
 region = snakemake.params.region
+deam_rate = snakemake.output.deam_rate
+mut_rate = snakemake.output.mut_rate
+strandtype = snakemake.output.strandtype
+bias = snakemake.output.bias
 
 
 
 
+# for testing
+#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test.summary_seq_metrics.reads.tbl.gz"
+#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
+#region = "chr4_3073138_3075853"
+#deam_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_histogram.pdf"
+#mut_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.mutation_rate_histogram.pdf"
+#strandtype = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_classification_proportions.pdf"
+#bias = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_by_doublet_type.pdf"
 
 
-
-
-#summary_path = "/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/htt_test.summary_metrics.tbl.gz"
 
 summary_metrics = pd.read_csv(summary_path, sep='\t', header=0)
 
@@ -41,10 +50,10 @@ if region_df.empty:
     dummy_plot = plt.figure(figsize=(10, 6))
     plt.text(0.5, 0.5, 'No data available for this region', fontsize=12, ha='center', va='center')
     plt.axis('off')
-    plt.savefig(snakemake.output.deam_rate, format='pdf')
-    plt.savefig(snakemake.output.mut_rate, format='pdf')
-    plt.savefig(snakemake.output.strandtype, format='pdf')
-    plt.savefig(snakemake.output.bias, format='pdf')
+    plt.savefig(deam_rate, format='pdf')
+    plt.savefig(mut_rate, format='pdf')
+    plt.savefig(strandtype, format='pdf')
+    plt.savefig(bias, format='pdf')
     
 else:
 
@@ -94,7 +103,7 @@ else:
     plt.xlabel('Deamination Rate')
     plt.ylabel('Frequency')
 
-    plt.savefig(snakemake.output.deam_rate, format='pdf')
+    plt.savefig(deam_rate, format='pdf')
 #    plt.show()
 
 
@@ -135,7 +144,7 @@ else:
     plt.title('Non-reference Variant Rate ' + label)
     plt.xlabel('Mutation Rate')
     plt.ylabel('Frequency')
-    plt.savefig(snakemake.output.mut_rate, format='pdf')
+    plt.savefig(mut_rate, format='pdf')
 #    plt.savefig(f'{chrom}_{start}.{snakemake.output.mutation_rate_histogram}, format='pdf')
 #    plt.show()
 
@@ -185,7 +194,7 @@ else:
     ax.legend(handles[::-1], labels[::-1], bbox_to_anchor=(1.05, 1), loc='upper left')
 
     plt.tight_layout()
-    plt.savefig(snakemake.output.strandtype, format='pdf')
+    plt.savefig(strandtype, format='pdf')
 #    plt.savefig(f'{chrom}_{start}.{snakemake.output.read_classification_proportions}', format='pdf')
 #    plt.show()
 
@@ -234,7 +243,7 @@ else:
 
 
     plt.tight_layout()
-    plt.savefig(snakemake.output.bias, format='pdf')
+    plt.savefig(bias, format='pdf')
 #    plt.savefig(f'{chrom}_{start}.{snakemake.output.deamination_rate_by_doublet_type}' , format='pdf')
 
 #    plt.show()

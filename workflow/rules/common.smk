@@ -38,6 +38,20 @@ def get_chimera_cutoff():
         chimera_cutoff=config["chimera_cutoff"]
     return chimera_cutoff
 
+def get_min_deamination_count():
+    if "min_deamination_count" not in config:
+        min_deamination_count = 50
+    else:
+        min_deamination_count = config["min_deamination_count"]
+    return min_deamination_count
+
+def get_end_tolerance():
+    if "end_tolerance" not in config:
+        end_tolerance = 30
+    else:
+        end_tolerance = config["end_tolerance"]
+    return end_tolerance
+
 def get_consensus_min_reads():
     if "consensus_min_reads" not in config:
         consensus_min_reads = 3

@@ -71,7 +71,8 @@ rule targeting_qc:
     input:
         data="results/{sm}/align/{sm}.mapped.reads.bam"
     params:
-        regions= get_input_regs
+        regions= get_input_regs,
+        end_tolerance=END_TOLERANCE
     output:
         detailed="results/{sm}/qc/reads/{sm}.detailed_targeting_metrics.tbl.gz",
         summary="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl"
@@ -100,7 +101,8 @@ rule sequence_qc:
         targeting_data=get_targeting_data
     params:
         regions= get_input_regs,
-        chimera_cutoff = CHIMERA_CUTOFF
+        chimera_cutoff = CHIMERA_CUTOFF,
+        min_deamination_count = MIN_DEAMINATION_COUNT
     output:
         read_metrics="results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz",
         summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz"

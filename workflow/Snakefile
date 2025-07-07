@@ -17,6 +17,8 @@ PLATFORM = get_platform()
 IS_FASTQ = get_is_fastq()
 CONSENSUS = get_consensus()
 CONSENSUS_MIN_READS = get_consensus_min_reads()
+MIN_DEAMINATION_COUNT = get_min_deamination_count()
+END_TOLERANCE = get_end_tolerance()
 
 
 include: "rules/rules.smk"
