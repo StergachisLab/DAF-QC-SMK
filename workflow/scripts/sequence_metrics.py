@@ -2,6 +2,7 @@ import pysam
 #import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import os
 
 
 # Inputs: aligned bam file with MD tags, regions (string), output file location
@@ -11,6 +12,8 @@ bam_path = snakemake.input.data
 regions = snakemake.params.regions
 targeting_metrics = snakemake.input.targeting_data
 chimera_cutoff = snakemake.params.chimera_cutoff
+read_metrics = snakemake.output.read_metrics
+summary_metrics = snakemake.output.summary_metrics
 
 #targeting_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/htt_test.detailed_targeting_metrics.tbl.gz"
 
@@ -248,6 +251,7 @@ def aggregate_strand_metrics(table):
     return aggregate_table
 
 
+os.makedirs(os.path.dirname(read_metrics), exist_ok=True)
 
 
 pybam=pysam.AlignmentFile(bam_path, 'rb')
@@ -295,6 +299,6 @@ for column in ['mutation_rate', 'all_deam_rate', 'AC_deam_rate', 'CC_deam_rate',
     
 table['deamination_positions'] = table['deamination_positions'].apply(lambda x: ','.join(map(str, x)) if isinstance(x, list) else '')
 
-table.to_csv(snakemake.output.read_metrics, sep='\t', index=False, compression='gzip')
-aggregate_table.to_csv(snakemake.output.summary_metrics, sep='\t', index=False, compression='gzip')
+table.to_csv(read_metrics, sep='\t', index=False, compression='gzip')
+aggregate_table.to_csv(summary_metrics, sep='\t', index=False, compression='gzip')
 

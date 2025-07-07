@@ -8,8 +8,8 @@ rule deduplicate:
     conda:
         "../envs/cmd.yaml"
     output:
-        dedup_bam=temp("temp/{sm}/align/{sm}.dupmark.bam"),
-        dup_index=temp("temp/{sm}/align/{sm}.dupmark.bam.bai")
+        dedup_bam=temp("temp/{sm}/align/{sm}.reads.bam"),
+        dup_index=temp("temp/{sm}/align/{sm}.reads.bam.bai")
     log:
         "logs/{sm}/dedup/{sm}.dedup.log"
     threads: 8
@@ -73,20 +73,22 @@ rule targeting_qc:
     params:
         regions= get_input_regs
     output:
-        detailed="results/{sm}/qc/{sm}.detailed_targeting_metrics.tbl.gz",
-        summary="results/{sm}/qc/{sm}.summary_targeting_metrics.tbl"
+        detailed="results/{sm}/qc/reads/{sm}.detailed_targeting_metrics.tbl.gz",
+        summary="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl"
     conda:
         "../envs/python.yaml"
     script:
         "../scripts/target_metrics.py"
 
+
+
 rule plot_targeting_qc:
     input:
-        targeting_metrics= "results/{sm}/qc/{sm}.summary_targeting_metrics.tbl"
+        targeting_metrics= "results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl"
     params:
         regions= get_input_regs
     output:
-        plot= "results/{sm}/qc/{sm}.targeting_plot.pdf"
+        plot= "results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf"
     conda:
         "../envs/python.yaml"
     script:
@@ -100,8 +102,8 @@ rule sequence_qc:
         regions= get_input_regs,
         chimera_cutoff = CHIMERA_CUTOFF
     output:
-        read_metrics="results/{sm}/qc/{sm}.detailed_seq_metrics.{type}.tbl.gz",
-        summary_metrics="results/{sm}/qc/{sm}.summary_seq_metrics.{type}.tbl.gz"
+        read_metrics="results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz",
+        summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz"
     conda:
         "../envs/python.yaml"
     script:
@@ -109,23 +111,25 @@ rule sequence_qc:
 
 rule plot_seq_qc:
     input:
-        summary_metrics = "results/{sm}/qc/{sm}.summary_seq_metrics.{type}.tbl.gz"
+        summary_metrics = "results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz"
     params:
         region = "{region}"
     output:
-        deam_rate = "results/{sm}/qc/{sm}.{region}.deam_rate.{type}.pdf",
-        mut_rate = "results/{sm}/qc/{sm}.{region}.mut_rate.{type}.pdf",
-        strandtype = "results/{sm}/qc/{sm}.{region}.strandtype.{type}.pdf",
-        bias = "results/{sm}/qc/{sm}.{region}.bias.{type}.pdf"
+        deam_rate = "results/{sm}/qc/{type}/plots/{sm}.{region}.deam_rate.{type}.pdf",
+        mut_rate = "results/{sm}/qc/{type}/plots/{sm}.{region}.mut_rate.{type}.pdf",
+        strandtype = "results/{sm}/qc/{type}/plots/{sm}.{region}.strandtype.{type}.pdf",
+        bias = "results/{sm}/qc/{type}/plots/{sm}.{region}.bias.{type}.pdf"
     conda:
         "../envs/python.yaml"
     script:
         "../scripts/plot_sequence_metrics.py"
 
+
+
 rule filter_bam:
     input:
         bam="results/{sm}/align/{sm}.mapped.reads.bam",
-        seq_metrics="results/{sm}/qc/{sm}.detailed_seq_metrics.reads.tbl.gz"
+        seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
     output:
         filtered_bam="temp/{sm}/align/{sm}.filtered.bam",
         index="temp/{sm}/align/{sm}.filtered.bam.bai"
@@ -141,9 +145,9 @@ rule filter_bam:
 rule decorate_strands:
     input:
         bam="temp/{sm}/align/{sm}.filtered.bam",
-        seq_metrics="results/{sm}/qc/{sm}.detailed_seq_metrics.reads.tbl.gz"
+        seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
     output:
-        decorated_bam="results/{sm}/align/{sm}.decorated.bam"
+        decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam"
     conda:
         "../envs/python.yaml"
     script:
@@ -151,9 +155,9 @@ rule decorate_strands:
 
 rule index_decorated:
     input:
-        "results/{sm}/align/{sm}.decorated.bam"
+        "results/{sm}/align/{sm}.decorated.reads.bam"
     output:
-        "results/{sm}/align/{sm}.decorated.bam.bai"
+        "results/{sm}/align/{sm}.decorated.reads.bam.bai"
     conda:
         "../envs/cmd.yaml"
     shell:
@@ -169,7 +173,7 @@ rule deduplication_metrics:
     params:
         regions= get_input_regs
     output:
-        deduplication_metrics="results/{sm}/qc/{sm}.deduplication_metrics.tbl.gz"
+        deduplication_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz"
     conda:
         "../envs/python.yaml"
     script:
@@ -179,12 +183,12 @@ rule deduplication_metrics:
 
 rule plot_deduplication_metrics:
     input:
-        summary_metrics="results/{sm}/qc/{sm}.deduplication_metrics.tbl.gz"
+        summary_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz"
     params:
         region = "{region}"
     output:
-        duplication_reads = "results/{sm}/qc/{sm}.{region}.duplication_reads.pdf",
-        duplication_groups = "results/{sm}/qc/{sm}.{region}.duplication_groups.pdf"
+        duplication_reads = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_reads.pdf",
+        duplication_groups = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.pdf"
     conda:
         "../envs/python.yaml"
     script:
@@ -215,3 +219,8 @@ rule build_consensus:
 # make targeting plot % on targets more clear, fix percent vs fraction issue.
 # fix start end coordinates in strand metrics to clarify fiber coordinates vs target coordinates
 # As an optional note, can add script on github to decorate the consensus and merge it with the filtered file.
+# add total coverage of targets
+# add option to require a certain amount of CT or GA to call a strand
+# add proportion or count of reads that are above cutoff on deduplication plot
+# email Aaron about pbmarkdup. Find out what parameters are avaiable
+# subsample for decorated and sequencing metrics? 

@@ -1,5 +1,7 @@
 import pysam
 import pandas as pd
+import os
+
 
 bam_path = snakemake.input.data
 regions = snakemake.params.regions
@@ -29,7 +31,7 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
     non_full_length_reads_clip = []
     non_primary_reads = []
     read_count = 0
-    map_start, map_end = None, None
+#    map_start, map_end = None, None
 
     for read in bam.fetch(chrom, start, end):
         read_count += 1
@@ -72,10 +74,8 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
     read_data = pd.DataFrame(
         {
             "chrom": chrom,
-            "target_start": start,
-            "target_end": end,
-            "read_start": map_start,
-            "read_end": map_end,
+            "start": start,
+            "end": end,
             "full_length_reads": [full_length_reads],
             "non_full_length_reads": [
                 non_full_length_reads_map + non_full_length_reads_clip
@@ -103,8 +103,8 @@ def aggregate_strand_metrics(table, total_fibers):
     aggregate_table = pd.DataFrame(
         {
             "chrom": table["chrom"],
-            "start": table["target_start"],
-            "end": table["target_end"],
+            "start": table["start"],
+            "end": table["end"],
             "#_full_length_reads": table["full_length_reads"].apply(len),
             "#_non_full_length_reads": table["non_full_length_reads"].apply(len),
             "#_non_primary_reads": table["non_primary_reads"].apply(len),
@@ -114,6 +114,8 @@ def aggregate_strand_metrics(table, total_fibers):
 
     return aggregate_table
 
+
+os.makedirs(os.path.dirname(output_detailed), exist_ok=True)
 
 # bam = pyft.Fiberbam(bam_path)
 pybam = pysam.AlignmentFile(bam_path, "rb")

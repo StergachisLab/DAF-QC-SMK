@@ -24,6 +24,7 @@ include: "rules/rules.smk"
 
 
 if PLATFORM == "ont":
+    CONSENSUS = False  # Consensus is not supported for ONT data
     rule all:
         input:
             expand(rules.align_ont.output, sm=MANIFEST.index),

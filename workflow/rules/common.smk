@@ -76,10 +76,10 @@ def get_strand_qc_plot_paths():
         regions = MANIFEST.loc[sample, "regs"].strip().split(",")
         for region in regions:
             reg_label = region.replace(":","_").replace("-", "_")
-            prefix = f"results/{sample}/qc/{sample}.{reg_label}"
+            prefix = f"results/{sample}/qc"
             for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
                 for item in types:
-                    outputs.append(f"{prefix}.{plot}.{item}.pdf")
+                    outputs.append(f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf")
     return outputs
 
 def get_deduplication_qc_plot_paths():
@@ -88,13 +88,13 @@ def get_deduplication_qc_plot_paths():
         regions = MANIFEST.loc[sample, "regs"].strip().split(",")
         for region in regions:
             reg_label = region.replace(":","_").replace("-", "_")
-            prefix = f"results/{sample}/qc/{sample}.{reg_label}"
+            prefix = f"results/{sample}/qc/reads/plots/{sample}.{reg_label}"
             for level in ["reads", "groups"]:
                 outputs.append(f"{prefix}.duplication_{level}.pdf")
     return outputs
 
 def get_targeting_data(wc):
     if wc.type == "reads":
-        return f"results/{wc.sm}/align/{wc.sm}.mapped.reads.bam"
+        return f"results/{wc.sm}/qc/reads/{wc.sm}.detailed_targeting_metrics.tbl.gz"
     else:
         return []

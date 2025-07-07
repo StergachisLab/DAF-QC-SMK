@@ -1,6 +1,14 @@
 ref: /mmfs1/gscratch/stergachislab/assemblies/hg38.analysisSet.fa # path to a reference fasta
 manifest: config/config.tbl # table with samples to process. bam files should only include reads from a single PCR amplification.
+
+platform: pacbio # sequencing platform, either 'pacbio' or 'ont'. Default is pacbio
+
+# PacBio-specific options. Input should always be bam files.
 dup_end_length: 8000 # length to consider for deduplication
 dup_min_id_perc: 99.2 # minimum identity percentage required to mark duplicates
 chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a top or bottom strand designation (i.e. non-chimeric)
+consensus: True # whether to generate a consensus sequence for each read. Default is true
+consensus_min_reads: 3 # minimum number of reads required to generate a consensus sequence
 
+# ONT-specific options
+is_fastq: False # for ONT files only, specifies whether the input files are fastq, otherwise they are assumed to be bam files
