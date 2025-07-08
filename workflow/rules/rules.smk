@@ -187,9 +187,9 @@ rule plot_deduplication_metrics:
     input:
         summary_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz"
     params:
-        region = "{region}"
+        region = "{region}",
+        consensus_min_reads = CONSENSUS_MIN_READS
     output:
-        duplication_reads = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_reads.pdf",
         duplication_groups = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.pdf"
     conda:
         "../envs/python.yaml"
@@ -210,15 +210,12 @@ rule build_consensus:
     script:
         "../scripts/build_consensus.py"
 
-# output as temp file, needs to be aligned
-
 
 
 
 # Targeting metrics for consensus files?
 # add rule to save input parameters to smk folder
 # add logs where needed
-# make targeting plot % on targets more clear, fix percent vs fraction issue.
 # fix start end coordinates in strand metrics to clarify fiber coordinates vs target coordinates
 # As an optional note, can add script on github to decorate the consensus and merge it with the filtered file.
 # add total coverage of targets

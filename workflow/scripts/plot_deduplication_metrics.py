@@ -4,14 +4,15 @@ import matplotlib.pyplot as plt
 
 summary_path = snakemake.input.summary_metrics
 region = snakemake.params.region
-output_reads = snakemake.output.duplication_reads
+consensus_min_reads = snakemake.params.consensus_min_reads
+#output_reads = snakemake.output.duplication_reads
 output_groups = snakemake.output.duplication_groups
 
 
 
-summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
-region = "chr5_34760400_34763141"
-
+#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
+#region = "chr5_34760400_34763141"
+#consensus_min_reads = 3
 
 summary_metrics = pd.read_csv(summary_path, sep='\t', header=0)
 
@@ -24,7 +25,7 @@ chrom, start, end = region.split("_")
 start = int(start)
 end = int(end)
 
-print(chrom, start, end)
+#print(chrom, start, end)
 
 
 label = f"{chrom}:{start}-{end}"
@@ -37,7 +38,7 @@ if region_df['values'].to_list()[0] is None:
     dummy_plot = plt.figure(figsize=(10, 6))
     plt.text(0.5, 0.5, 'No data available for this region', fontsize=12, ha='center', va='center')
     plt.axis('off')
-    plt.savefig(output_reads, format='pdf')
+#    plt.savefig(output_reads, format='pdf')
     plt.savefig(output_groups, format='pdf')
 #    plt.show()
 
@@ -48,59 +49,12 @@ else:
 
     du_values = region_df['values'].explode().dropna().astype(int).tolist()
 
+    # get the sum of du_values
+    total_duplicates = sum(du_values)
+    dups_threshold = sum(x for x in du_values if x >= consensus_min_reads)
+    perc_dups_threshold = 100 * dups_threshold / total_duplicates if total_duplicates > 0 else 0
 
-
-
-    # By read, i.e. each read is represented, and so a group with 140 reads will be represented 140x more than
-    # a group with one read
-    du_values_reads = []
-    for x in du_values:
-        du_values_reads += [x]*x # Weighs values by read count
-    
-    reads_perc_duplicates = len([x for x in du_values_reads if x>1])/len(du_values_reads)
-    read_median_duplicates = np.median(du_values_reads) if du_values_reads else 0
-    read_duplicates_10 = np.percentile(du_values_reads, 10) if du_values_reads else 0
-    read_duplicates_90 = np.percentile(du_values_reads, 90) if du_values_reads else 0
-
-    upper_limit = 150
-    du_values_reads = [x if x <= upper_limit else upper_limit for x in du_values_reads]
-
-    
-    fig = plt.figure(figsize=(10, 6))
-    weights = [1/len(du_values_reads)] * len(du_values_reads)
-    plt.hist(du_values_reads, bins=35, color='blue', alpha=0.7, weights=weights)
-    plt.xlim(0, upper_limit)
-    plt.ylim(0, 1.0)
-
-    plt.axvline(read_median_duplicates, color='black', linestyle='dashed', linewidth=1, label=f'Median: {read_median_duplicates:.2f}')
-    plt.axvline(read_duplicates_10, color='black', linestyle='dashed', linewidth=1, label=f'10th Percentile: {read_duplicates_10:.2f}')
-    plt.axvline(read_duplicates_90, color='black', linestyle='dashed', linewidth=1, label=f'90th Percentile: {read_duplicates_90:.2f}')
-
-    # add text label next to median and quartile lines
-    # Get y-axis limits for positioning text
-    y_min, y_max = plt.ylim()
-
-    x_min, x_max = plt.xlim()
-
-    # Add text labels
-    plt.text(read_median_duplicates, y_max + y_max/80, '50%', rotation=90, va='bottom')
-    plt.text(read_duplicates_10, y_max + y_max/80, '10%', rotation=90, va='bottom')
-    plt.text(read_duplicates_90, y_max + y_max/80, '90%', rotation=90, va='bottom')
-
-    plt.text(x_max - x_max/4, y_max * 0.9, f'Median: {read_median_duplicates:.2f}', color='black', fontsize=10)
-    plt.text(x_max - x_max/4, y_max * 0.8, f'10th Percentile: {read_duplicates_10:.2f}', color='black', fontsize=10)
-    plt.text(x_max - x_max/4, y_max * 0.7, f'90th Percentile: {read_duplicates_90:.2f}', color='black', fontsize=10)
-
-    plt.title(f'Duplicates by Read {label}')
-    plt.xlabel('Duplicate Counts')
-    plt.ylabel('Proportion of reads')
-
-    plt.savefig(output_reads, format='pdf')
-#    plt.show()
-
-
-
-    # By group, i.e. only duplicates (group size >1) are considered, and each group has equal weight
+    # Plot duplicates by group, i.e. only duplicates (group size >1) are considered, and each group has equal weight
     dup_only = [x for x in du_values if x>1]
 
     group_median_duplicates = np.median(dup_only) if dup_only else 0
@@ -131,6 +85,7 @@ else:
     plt.text(x_max - x_max/4, y_max * 0.9, f'Median: {group_median_duplicates:.2f}', color='black', fontsize=10)
     plt.text(x_max - x_max/4, y_max * 0.8, f'10th Percentile: {group_duplicates_10:.2f}', color='black', fontsize=10)
     plt.text(x_max - x_max/4, y_max * 0.7, f'90th Percentile: {group_duplicates_90:.2f}', color='black', fontsize=10)
+    plt.text(x_max - x_max/4, y_max * 0.6, f'{total_duplicates} reads ({perc_dups_threshold:.0f}%) are\nin groups of {consensus_min_reads}+ duplicates', color='black', fontsize=10)
 
     plt.title(f'Duplicates by Group {label}')
     plt.xlabel('Duplicate Counts')
