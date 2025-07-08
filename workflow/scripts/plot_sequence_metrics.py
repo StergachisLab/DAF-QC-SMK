@@ -3,24 +3,24 @@ import numpy as np
 import pandas as pd
 
 
-summary_path = snakemake.input.summary_metrics
-region = snakemake.params.region
-deam_rate = snakemake.output.deam_rate
-mut_rate = snakemake.output.mut_rate
-strandtype = snakemake.output.strandtype
-bias = snakemake.output.bias
+#summary_path = snakemake.input.summary_metrics
+#region = snakemake.params.region
+#deam_rate = snakemake.output.deam_rate
+#mut_rate = snakemake.output.mut_rate
+#strandtype = snakemake.output.strandtype
+#bias = snakemake.output.bias
 
 
 
 
 # for testing
 #summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test.summary_seq_metrics.reads.tbl.gz"
-#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
-#region = "chr4_3073138_3075853"
-#deam_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_histogram.pdf"
-#mut_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.mutation_rate_histogram.pdf"
-#strandtype = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_classification_proportions.pdf"
-#bias = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_by_doublet_type.pdf"
+summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
+region = "chr4_3073138_3075853"
+deam_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_histogram.pdf"
+mut_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.mutation_rate_histogram.pdf"
+strandtype = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_classification_proportions.pdf"
+bias = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_by_doublet_type.pdf"
 
 
 
@@ -70,11 +70,20 @@ else:
     median_CT = np.median(CT_deam_rates)
     median_GA = np.median(GA_deam_rates)
 
-
+    y_limit = 0.1  # Set y-axis limit for red line
     fig= plt.figure(figsize=(10, 6))
     weights = [1/len(all_deam_rates)] * len(all_deam_rates)  # Normalize histogra
-    plt.hist(all_deam_rates, bins=50, color='blue', alpha=0.7, weights=weights)
+    counts, bins, patches=plt.hist(all_deam_rates, bins=50, color='blue', alpha=0.7, weights=weights)
+    plt.ylim(0, y_limit)  # Set y-axis limit to 0-0.1
     plt.xlim(0, 1)  # Set x-axis limit to 0-1
+    
+    # Draw red line above histogram if bin exceeds y axis limit
+    for i, count in enumerate(counts):
+        if count > y_limit:
+            bin_left = bins[i]
+            bin_right = bins[i+1]
+            plt.plot([bin_left, bin_right], [y_limit-y_limit*0.005, y_limit-y_limit*0.005], 
+                    color='red', linewidth=2)
 
     # add median and percentiles to the plot
     plt.axvline(median_deamination, color='black', linestyle='dashed', linewidth=1, label=f'Median: {median_deamination:.2f}')
@@ -88,9 +97,9 @@ else:
     x_min, x_max = plt.xlim()
 
     # Add text labels
-    plt.text(median_deamination , y_max + y_max/80, '50%', rotation=90, va='bottom')
-    plt.text(deamination_10  , y_max + y_max/80, '10%', rotation=90, va='bottom')
-    plt.text(deamination_90 , y_max + y_max/80, '90%', rotation=90, va='bottom')
+    plt.text(median_deamination + 0.005*x_max, y_max -0.1*y_max, '50%', rotation=90, va='bottom')
+    plt.text(deamination_10 + 0.005*x_max , y_max -0.1*y_max, '10%', rotation=90, va='bottom')
+    plt.text(deamination_90 + 0.005*x_max, y_max -0.1*y_max, '90%', rotation=90, va='bottom')
 
     plt.text(x_max - x_max/4, y_max * 0.9, f'Median: {median_deamination:.2f}', color='black', fontsize=10)
     plt.text(x_max - x_max/4, y_max * 0.8, f'10th Percentile: {deamination_10:.2f}', color='black', fontsize=10)
@@ -114,12 +123,22 @@ else:
     mutation_90 = np.percentile(mutation_rates, 90)
 
     upper_limit = 0.02
+    y_limit = 0.5  # Set y-axis limit for red line
     mutation_rates = [x if x <= upper_limit else upper_limit for x in mutation_rates]
     # Collapse higher rates into last bin
     fig= plt.figure(figsize=(10, 6))
     weights = [1/len(mutation_rates)] * len(mutation_rates)  # Normalize histogram
-    plt.hist(mutation_rates, bins=50, color='red', alpha=0.7, weights=weights)
+    counts, bins, patches=plt.hist(mutation_rates, bins=50, color='blue', alpha=0.7, weights=weights)
     plt.xlim(0, upper_limit)  # Set x-axis limit to 0-0.02
+    plt.ylim(0, y_limit)  # Set y-axis limit to 0-0.2
+
+    # Draw red line above histogram if bin exceeds y axis limit
+    for i, count in enumerate(counts):
+        if count > y_limit:
+            bin_left = bins[i]
+            bin_right = bins[i+1]
+            plt.plot([bin_left, bin_right], [y_limit-y_limit*0.005, y_limit-y_limit*0.005], 
+                    color='red', linewidth=2)
 
     plt.axvline(median_mutation, color='black', linestyle='dashed', linewidth=1, label=f'Median: {median_mutation:.6f}')
     plt.axvline(mutation_10, color='black', linestyle='dashed', linewidth=1, label=f'10th Percentile: {mutation_10:.6f}')
@@ -168,7 +187,7 @@ else:
     colors = {'CT': 'red',
             'GA': 'green', 
             'chimera': '#ff7f0e',  # orange
-            'undetermined': '#d62728',  # red
+            'undetermined': 'blue',  # blue
             'none': '#9467bd'  # purple
             }
 
@@ -219,15 +238,31 @@ else:
     non_TC_weights = [1/len(non_TC_values)] * len(non_TC_values)
     TC_weights = [1/len(TC_values)] * len(TC_values)
     # plot all values on the same histogram
+    y_limit = 0.1
     plt.figure(figsize=(10, 6))
-    plt.hist(non_TC_values, bins=50, alpha=0.5, label='Non-TC', color='blue', weights=non_TC_weights)
+    counts, bins, patches=plt.hist(non_TC_values, bins=50, alpha=0.5, label='Non-TC', color='blue', weights=non_TC_weights)
+    # Draw red line above histogram if bin exceeds y axis limit
+    for i, count in enumerate(counts):
+        if count > y_limit:
+            bin_left = bins[i]
+            bin_right = bins[i+1]
+            plt.plot([bin_left, bin_right], [y_limit-y_limit*0.005, y_limit-y_limit*0.005], 
+                    color='red', linewidth=2)
     #plt.hist(AC_values, bins=50, alpha=0.5, label='AC', color='blue', weights=weights)
     #plt.hist(CC_values, bins=50, alpha=0.5, label='CC', color='orange', weights=weights)
     #plt.hist(GC_values, bins=50, alpha=0.5, label='GC', color='green', weights=weights)
-    plt.hist(TC_values, bins=50, alpha=0.5, label='TC', color='red', weights=TC_weights)
+    counts, bins, patches=plt.hist(TC_values, bins=50, alpha=0.5, label='TC', color='red', weights=TC_weights)
+    # Draw red line above histogram if bin exceeds y axis limit
+    for i, count in enumerate(counts):
+        if count > y_limit:
+            bin_left = bins[i]
+            bin_right = bins[i+1]
+            plt.plot([bin_left, bin_right], [y_limit-y_limit*0.005, y_limit-y_limit*0.005], 
+                    color='red', linewidth=2)
     #plt.hist(OC_values, bins=50, alpha=0.5, label='OC', color='purple', weights=weights)
 
     plt.xlim(0, 1)  # Set x-axis limit to 0-1
+    plt.ylim(0, y_limit)
     plt.xlabel('Deamination Rate')
     plt.ylabel('Frequency')
     plt.title('Deamination Rate by Doublet Type ' + label)
