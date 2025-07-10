@@ -3,24 +3,24 @@ import numpy as np
 import pandas as pd
 
 
-#summary_path = snakemake.input.summary_metrics
-#region = snakemake.params.region
-#deam_rate = snakemake.output.deam_rate
-#mut_rate = snakemake.output.mut_rate
-#strandtype = snakemake.output.strandtype
-#bias = snakemake.output.bias
+summary_path = snakemake.input.summary_metrics
+region = snakemake.params.region
+deam_rate = snakemake.output.deam_rate
+mut_rate = snakemake.output.mut_rate
+strandtype = snakemake.output.strandtype
+bias = snakemake.output.bias
 
 
 
 
 # for testing
 #summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test.summary_seq_metrics.reads.tbl.gz"
-summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
-region = "chr4_3073138_3075853"
-deam_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_histogram.pdf"
-mut_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.mutation_rate_histogram.pdf"
-strandtype = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_classification_proportions.pdf"
-bias = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_by_doublet_type.pdf"
+#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics.tsv.gz"
+#region = "chr4_3073138_3075853"
+#deam_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_histogram.pdf"
+#mut_rate = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.mutation_rate_histogram.pdf"
+#strandtype = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.read_classification_proportions.pdf"
+#bias = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.deamination_rate_by_doublet_type.pdf"
 
 
 
@@ -73,7 +73,8 @@ else:
     y_limit = 0.1  # Set y-axis limit for red line
     fig= plt.figure(figsize=(10, 6))
     weights = [1/len(all_deam_rates)] * len(all_deam_rates)  # Normalize histogra
-    counts, bins, patches=plt.hist(all_deam_rates, bins=50, color='blue', alpha=0.7, weights=weights)
+    bin_specs = [x/100 for x in range(0, 101)] # create consistent bin widths
+    counts, bins, patches=plt.hist(all_deam_rates, bins=bin_specs, color='blue', alpha=0.7, weights=weights)
     plt.ylim(0, y_limit)  # Set y-axis limit to 0-0.1
     plt.xlim(0, 1)  # Set x-axis limit to 0-1
     

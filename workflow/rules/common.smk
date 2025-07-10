@@ -103,8 +103,7 @@ def get_deduplication_qc_plot_paths():
         for region in regions:
             reg_label = region.replace(":","_").replace("-", "_")
             prefix = f"results/{sample}/qc/reads/plots/{sample}.{reg_label}"
-            for level in ["reads", "groups"]:
-                outputs.append(f"{prefix}.duplication_{level}.pdf")
+            outputs.append(f"{prefix}.duplication_groups.pdf")
     return outputs
 
 def get_targeting_data(wc):
