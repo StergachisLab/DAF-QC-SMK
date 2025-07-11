@@ -91,6 +91,7 @@ def consensus_dfm_to_bam(dups_consensus_dfm, template_bam_path, output_bam_path)
         zm_tag=row['du'].split('/')[1]
         a.set_tag('zm', int(zm_tag))
         a.set_tag('YC', '240,187,201')
+        a.set_tag('ds', int(row['read_count']))
 
 
         output_bam.write(a)
