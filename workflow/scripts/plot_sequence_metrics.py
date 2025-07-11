@@ -37,12 +37,12 @@ chrom, start, end = region.split("_")
 start = int(start)
 end = int(end)
 
-print(chrom, start, end)
+#print(chrom, start, end)
 
 
 label = f"{chrom}:{start}-{end}"
 # Filter the summary metrics for the specified region
-region_df = summary_metrics[(summary_metrics['chrom'] == chrom) & (summary_metrics['start'] == start) & (summary_metrics['end'] == end)]
+region_df = summary_metrics[(summary_metrics['chrom'] == chrom) & (summary_metrics['reg_start'] == start) & (summary_metrics['reg_end'] == end)]
 
 
 if region_df.empty:

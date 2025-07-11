@@ -13,6 +13,8 @@ rule deduplicate:
     log:
         "logs/{sm}/dedup/{sm}.dedup.log"
     threads: 8
+    benchmark:
+        "benchmark/{sm}.benchmark.txt"
     shell:
         """
         mkdir -p temp/{wildcards.sm}/align logs/{wildcards.sm}/dedup && \
@@ -139,7 +141,7 @@ rule filter_bam:
         "../envs/cmd.yaml"
     shell:
         """
-        samtools view -F 2306 -b -N <(zcat {input.seq_metrics} | awk -F'\t' '$6=="CT" || $6=="GA" {{print $1}}') {input.bam} > {output.filtered_bam}
+        samtools view -F 2306 -b -N <(zcat {input.seq_metrics} | awk -F'\t' '$8=="CT" || $8=="GA" {{print $1}}') {input.bam} > {output.filtered_bam}
         samtools index {output.filtered_bam}
         """
 

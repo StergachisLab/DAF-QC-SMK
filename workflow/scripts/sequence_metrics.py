@@ -152,13 +152,15 @@ def strand_metrics_table (psfile, chrom, start, end, chimera_cutoff=0.9, include
         read_data = {           
             'read_name': read.query_name, 
             'chr': chrom, 
-            'st': start, 
-            'end': end, 
+            'reg_st': start, 
+            'reg_end': end,
+            'strand_st': read.reference_start,
+            'strand_end': read.reference_end,
             'length': len(read.query_sequence),
             'strand': strand,
             'duplicate' : duplicate,
             'mutation_count' : mutation_count,
-            'deamination_positions' : ','.join(map(str, deam_pos)) if deam_pos else ''
+            'deamination_positions' : ','.join(map(str, deam_pos)) if deam_pos is not None else ''
         }
         
         keys = ['AC', 'CC', 'GC', 'TC', 'OC']
@@ -192,7 +194,7 @@ def aggregate_strand_metrics(table):
 #                          'AC_deam_rate':[], 'CC_deam_rate':[], 'GC_deam_rate':[], 'TC_deam_rate':[], 'OC_deam_rate':[]}
     aggregate_collector = []
 
-    for group in table.groupby(['chr', 'st', 'end', 'strand']):
+    for group in table.groupby(['chr', 'reg_st', 'reg_end', 'strand']):
         mutation_rate = group[1]['mutation_rate'].dropna().tolist()
         all_deam_rate = group[1]['all_deam_rate'].dropna().tolist()
         AC_deam_rates = group[1]['AC_deam_rate'].dropna().tolist()
@@ -202,11 +204,21 @@ def aggregate_strand_metrics(table):
         OC_deam_rates = group[1]['OC_deam_rate'].dropna().tolist()
         count = len(group[1])
 
-        
-        aggregate_template = {'chrom': group[0][0], 'start': group[0][1], 'end': group[0][2], 
-                            'strand': group[0][3], 'count':count, 'mutation_rate': ','.join(map(str, mutation_rate)), 'all_deam_rate': ','.join(map(str, all_deam_rate)),
-                            'AC_deam_rate': ','.join(map(str, AC_deam_rates)), 'CC_deam_rate': ','.join(map(str,CC_deam_rates)),
-                            'GC_deam_rate': ','.join(map(str,GC_deam_rates)), 'TC_deam_rate': ','.join(map(str,TC_deam_rates)), 'OC_deam_rate': ','.join(map(str,OC_deam_rates))}
+        aggregate_template = {
+            'chrom': group[0][0], 
+            'reg_start': group[0][1], 
+            'reg_end': group[0][2], 
+            'strand': group[0][3], 
+            'count': count, 
+            'mutation_rate': ','.join(map(str, mutation_rate)) if mutation_rate else '', 
+            'all_deam_rate': ','.join(map(str, all_deam_rate)) if all_deam_rate else '',
+            'AC_deam_rate': ','.join(map(str, AC_deam_rates)) if AC_deam_rates else '', 
+            'CC_deam_rate': ','.join(map(str, CC_deam_rates)) if CC_deam_rates else '',
+            'GC_deam_rate': ','.join(map(str, GC_deam_rates)) if GC_deam_rates else '', 
+            'TC_deam_rate': ','.join(map(str, TC_deam_rates)) if TC_deam_rates else '', 
+            'OC_deam_rate': ','.join(map(str, OC_deam_rates)) if OC_deam_rates else ''
+        }
+
         aggregate_collector.append(aggregate_template)
 
         aggregate_table = pd.DataFrame(aggregate_collector)
