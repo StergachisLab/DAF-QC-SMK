@@ -2,17 +2,17 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-#summary_path = snakemake.input.summary_metrics
-#region = snakemake.params.region
-#consensus_min_reads = snakemake.params.consensus_min_reads
+summary_path = snakemake.input.summary_metrics
+region = snakemake.params.region
+consensus_min_reads = snakemake.params.consensus_min_reads
 #output_reads = snakemake.output.duplication_reads
-#output_groups = snakemake.output.duplication_groups
+output_groups = snakemake.output.duplication_groups
 
 
 
-summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
-region = "chr5_34760400_34763141"
-consensus_min_reads = 3
+#summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
+#region = "chr5_34760400_34763141"
+#consensus_min_reads = 3
 
 summary_metrics = pd.read_csv(summary_path, sep='\t', header=0)
 
@@ -63,7 +63,7 @@ else:
 
     x_limit = 500
     y_limit = 0.5
-    dup_only = [x if x <= upper_limit else upper_limit for x in dup_only]
+    dup_only = [x if x <= x_limit else x_limit for x in dup_only]
 
     fig = plt.figure(figsize=(10, 6))
     weights = [1/len(dup_only)] * len(dup_only)
@@ -98,8 +98,8 @@ else:
     plt.title(f'Duplicate groups ≥ {consensus_min_reads}, {label}')
     plt.xlabel('Duplicate Counts')
     plt.ylabel('Proportion of groups')
-#    plt.savefig(output_groups, format='pdf')
-    plt.show()
+    plt.savefig(output_groups, format='pdf')
+#    plt.show()
 
 
 
