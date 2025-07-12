@@ -26,7 +26,7 @@ chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a
 ```
 
 # PacBio-specific options
-End length to consider for deduplication, sets pbmarkdup `--end-length` flag. Default is 8000
+End length to consider for deduplication, sets pbmarkdup `--end-length` flag. Default is 0, which uses the whole read
 ```
 dup_end_length: 8000
 ```
