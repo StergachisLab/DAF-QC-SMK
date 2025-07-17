@@ -42,14 +42,14 @@ And in place of `...` use all the normal Snakemake arguments for your workflow.
 
 
 ## Inputs
-Table that includes sample name, bam/FASTA path, and targeted regions. For compatibility with pbmarkdup, PacBio bam file inputs should be either unaligned or filtered for primary reads only if a consensus will be generated.
+`config.tbl` Table that includes sample name, bam/FASTA path, and targeted regions. For compatibility with pbmarkdup, PacBio bam file inputs should be either unaligned or filtered for primary reads only if a consensus will be generated.
 See `config/config.tbl` for a template.
 ```
 sample	file	regs
 test_sample	/my/bam/path/file.bam	chr4:3073138-3075853,chr3:179228176-179236561
 ``` 
 
-Config file that includes paths to sample table and reference genome and specifies custom parameters.
+`config.yaml` Config file that includes paths to sample table and reference genome and specifies custom parameters.
 See `config.config.yaml` for a template.
 ```
 ref: /my/ref/path/genome.fa # path to a reference fasta
@@ -75,31 +75,21 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 ## Outputs
 ### BAM files
 
-Aligned bam containing all primary, supplementary, and unaligned reads with PCR duplicates marked (du and ds tags)
-```
-results/{sample_name}/align/{sample_name}.mapped.reads.bam"
-```
+`results/{sample_name}/align/{sample_name}.mapped.reads.bam` Aligned bam containing all primary, supplementary, and unaligned reads with PCR duplicates marked (du and ds tags)
 
-bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the ST tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
-```
-results/{sample_name}/align/{sample_name}.decorated.bam"
-```
+`results/{sample_name}/align/{sample_name}.decorated.bam` bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the `ST` tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 
-bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are constructed from a representative read name (i.e. `pbmarkdup` du tag) with "_consensus" appended. The <pending name> tag indicates the number of reads that were used to construct the consensus. 
-```
-results/{sample_name}/align/{sample_name}.consensus.bam 
-```
+`results/{sample_name}/align/{sample_name}.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are constructed from a representative read name (i.e. `pbmarkdup` du tag) with "_consensus" appended. The <pending name> tag indicates the number of reads that were used to construct the consensus. 
 
 
 ### Data files
+`results/{sample_name}/qc/reads/{sample_name}.detailed_targeting_metrics.tbl.gz` For each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
 
-For each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
-results/{sample_name}/qc/{sample_name}.detailed_targeting_metrics.tbl.gz 
-results/{sm}/qc/{sm}.summary_targeting_metrics.tbl # for each region, contains the number of reads in each category
+`results/{sm}/qc/{sm}.summary_targeting_metrics.tbl` For each region, contains the number of reads in each category
 
+`results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand deamination and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus).
 
-results/{sample_name}/qc/{sample_name}.detailed_seq_metrics.{type}.tbl.gz # contains strand by strand deamination and mutation metrics for full length reads or consensus sequences
-results/{sample_name}/qc/{sample_name}.summary_seq_metrics.{type}.tbl.gz # contains proportions of deaminations by region and strand type for full length reads or consensus sequences
+`results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region and strand type for full length reads or consensus sequences
 
 
 ### Plots
