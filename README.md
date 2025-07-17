@@ -83,3 +83,4 @@ Thank you to Mitchell Vollger for providing the template for this Snakemake work
 Convert to CRAM files where possible
 Note that input of a region with no reads will not fail but will omit that region from plots. Add warning that prints to file if this happens.
 Eventually, call nucs, FIRE/accessibility?
+test
