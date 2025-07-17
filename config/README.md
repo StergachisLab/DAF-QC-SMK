@@ -22,22 +22,22 @@ platform: pacbio
 # Optional (both platforms)
 For each read, minimum fraction of C->T + G->A mutations that must be either C->T or G->A for a read to be designated as non-chimeric. Default is 0.9
 ```
-chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a top or bottom strand designation (i.e. non-chimeric)
+chimera_cutoff: 0.9
 ```
 
 For each read, minimum number of C->T + G->A mutations for top/bottom strand designation. Default is 50
 ```
-min_deamination_count: 50 # minimum number of deaminations for top/bottom strand designation
+min_deamination_count: 50
 ```
 
 +/- end length tolerance (in bp) for classifying full-length reads. Default is 30 bp
 ```
-end_tolerance: 30 # +/- end length tolerance (in bp) for classifying full-length reads
+end_tolerance: 30
 ```
 
 Approximate number of filtered reads to output in decorated reads bam for visualization. If this number exceeds the read count post-filtering for full-length and top/bottom reads, all reads will be used. Default is 5000.
 ```
-decorated_samplesize: 5000 # Approximate number of reads to output as decorated reads bam for visualization
+decorated_samplesize: 5000
 ```
 
 # PacBio-specific options
