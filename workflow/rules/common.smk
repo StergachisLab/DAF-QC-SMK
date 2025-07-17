@@ -19,7 +19,7 @@ def get_manifest():
 
 def get_dup_end_length():
     if "dup_end_length" not in config:
-        dup_end_length = 8000
+        dup_end_length = 0
     else:
         dup_end_length=config["dup_end_length"]
     return dup_end_length
@@ -74,10 +74,21 @@ def get_consensus():
     return consensus
 
 def get_is_fastq():
-    return config["is_fastq"]
+    if "is_fastq" not in config:
+        is_fastq = False
+    else:
+        is_fastq = config["is_fastq"]
+    return is_fastq
 
-def get_input_bam(wc):
-    return MANIFEST.loc[wc.sm, "bam"]
+def get_decorated_samplesize():
+    if "decorated_samplesize" not in config:
+        sample_size = 5000
+    else:
+        sample_size = config["decorated_samplesize"]
+    return sample_size
+
+def get_input_file(wc):
+    return MANIFEST.loc[wc.sm, "file"]
 
 def get_input_regs(wc):
     regions = MANIFEST.loc[wc.sm, "regs"].strip().split(",")

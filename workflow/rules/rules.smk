@@ -1,7 +1,7 @@
 # Basic rules
 rule deduplicate:
     input:
-        data= get_input_bam
+        data= get_input_file
     params:
         dup_end_len=DUP_END_LENGTH,
         min_id=MIN_ID_PERC
@@ -49,7 +49,7 @@ elif PLATFORM == "ont":
     rule align_ont:
         input:
             fa=REF,
-            data=get_input_bam
+            data=get_input_file
         conda:
             "../envs/cmd.yaml"
         output:
@@ -134,21 +134,34 @@ rule filter_bam:
     input:
         bam="results/{sm}/align/{sm}.mapped.reads.bam",
         seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
+    params:
+        sample_size=DECORATED_SAMPLESIZE
     output:
         filtered_bam="temp/{sm}/align/{sm}.filtered.bam",
-        index="temp/{sm}/align/{sm}.filtered.bam.bai"
+        index="temp/{sm}/align/{sm}.filtered.bam.bai",
+        sample_bam="temp/{sm}/align/{sm}.sample.bam",
+        sample_index="temp/{sm}/align/{sm}.sample.bam.bai"
     conda:
         "../envs/cmd.yaml"
     shell:
         """
         samtools view -F 2306 -b -N <(zcat {input.seq_metrics} | awk -F'\t' '$8=="CT" || $8=="GA" {{print $1}}') {input.bam} > {output.filtered_bam}
         samtools index {output.filtered_bam}
+        read_count=$(samtools view -c {output.filtered_bam})
+        read_frac=$(awk -v s={params.sample_size} -v b=$read_count 'BEGIN {{if (b>s) {{printf "%.6f\\n", s/b}} else {{printf "%.6f\\n", 1.0}}}}')
+        if (( $(echo "$read_frac != 1.000000" | bc -l) )); then
+            samtools view -b -s $read_frac {output.filtered_bam} > {output.sample_bam}
+            samtools index {output.sample_bam}
+        else
+            ln -s $(realpath {output.filtered_bam}) {output.sample_bam}
+            ln -s $(realpath {output.index}) {output.sample_index}
+        fi
         """
 
 
 rule decorate_strands:
     input:
-        bam="temp/{sm}/align/{sm}.filtered.bam",
+        bam="temp/{sm}/align/{sm}.sample.bam",
         seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
     output:
         decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam"
@@ -156,6 +169,7 @@ rule decorate_strands:
         "../envs/python.yaml"
     script:
         "../scripts/decorate_strands.py"
+
 
 rule index_decorated:
     input:
@@ -223,5 +237,4 @@ rule build_consensus:
 # add total coverage of targets
 # add option to require a certain amount of CT or GA to call a strand
 # add proportion or count of reads that are above cutoff on deduplication plot
-# email Aaron about pbmarkdup. Find out what parameters are avaiable
 # subsample for decorated and sequencing metrics? 

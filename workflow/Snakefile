@@ -14,11 +14,11 @@ DUP_END_LENGTH = get_dup_end_length()
 MIN_ID_PERC = get_min_id_perc()
 CHIMERA_CUTOFF = get_chimera_cutoff()
 PLATFORM = get_platform()
-IS_FASTQ = get_is_fastq()
 CONSENSUS = get_consensus()
 CONSENSUS_MIN_READS = get_consensus_min_reads()
 MIN_DEAMINATION_COUNT = get_min_deamination_count()
 END_TOLERANCE = get_end_tolerance()
+DECORATED_SAMPLESIZE = get_decorated_samplesize()
 
 
 include: "rules/rules.smk"
@@ -26,6 +26,7 @@ include: "rules/rules.smk"
 
 
 if PLATFORM == "ont":
+    IS_FASTQ = get_is_fastq()
     CONSENSUS = False  # Consensus is not supported for ONT data
     rule all:
         input:
