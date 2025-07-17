@@ -73,14 +73,14 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 ```
 
 ## Outputs
-BAM files
+### BAM files
 
-# aligned bam containing all primary, supplementary, and unaligned reads with PCR duplicates marked (du and ds tags)
+Aligned bam containing all primary, supplementary, and unaligned reads with PCR duplicates marked (du and ds tags)
 ```
 results/{sample_name}/align/{sample_name}.mapped.reads.bam"
 ```
 
-# bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the ST tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
+Bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the ST tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 ```
 results/{sample_name}/align/{sample_name}.decorated.bam"
 ```
@@ -91,7 +91,7 @@ results/{sample_name}/align/{sample_name}.consensus.bam
 ```
 
 
-Data files
+### Data files
 
 # for each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
 results/{sample_name}/qc/{sample_name}.detailed_targeting_metrics.tbl.gz 
@@ -102,10 +102,7 @@ results/{sample_name}/qc/{sample_name}.detailed_seq_metrics.{type}.tbl.gz # cont
 results/{sample_name}/qc/{sample_name}.summary_seq_metrics.{type}.tbl.gz # contains proportions of deaminations by region and strand type for full length reads or consensus sequences
 
 
-## Outputs
-
-
-Plots
+### Plots
 
 
 
