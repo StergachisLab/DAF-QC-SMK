@@ -42,8 +42,15 @@ And in place of `...` use all the normal Snakemake arguments for your workflow.
 
 
 ## Inputs
-config.tbl # table that includes sample name, bam/FASTA path, and targeted regions.
-Currently, the bam file must contain each read only once (i.e. either unaligned or filtered to exclude supplementary and secondary alignments).
+Table that includes sample name, bam/FASTA path, and targeted regions. For compatibility with pbmarkdup, PacBio bam file inputs should be either unaligned or filtered for primary reads only if a consensus will be generated.
+See `config/config.tbl` for a template.
+```
+sample	file	regs
+htt_test	/mmfs1/gscratch/stergachislab/bohaczuk/analysis/chdi-hd/primer-design/25.3.7_vega/HTTLNA_reset.bam	chr4:3073138-3075853,chr3:179228176-179236561
+``` 
+
+
+
 config.yaml # points to sample table, collects reference genome, and allows for custom parameters.
 
 ## Outputs
