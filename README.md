@@ -17,16 +17,15 @@ pixi install
 
 ## Usage
 
-`pixi` handles the execution of the Snakemake workflows:
+`pixi` handles the execution of the Snakemake workflows. You can run it with either of the following:
 
-## I have been running it with the following. The options below should also work but have not yet been tested.
+
 ```
 pixi shell
 snakemake --configfile config/config.yaml
 ```
 
 
-## Also probably works:
 ```bash
 pixi run snakemake ...
 ```
@@ -43,7 +42,7 @@ And in place of `...` use all the normal Snakemake arguments for your workflow.
 
 
 ## Inputs
-config.tbl # table that includes sample name, bam path, and targeted regions.
+config.tbl # table that includes sample name, bam/FASTA path, and targeted regions.
 Currently, the bam file must contain each read only once (i.e. either unaligned or filtered to exclude supplementary and secondary alignments).
 config.yaml # points to sample table, collects reference genome, and allows for custom parameters.
 
