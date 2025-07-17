@@ -80,12 +80,12 @@ Aligned bam containing all primary, supplementary, and unaligned reads with PCR 
 results/{sample_name}/align/{sample_name}.mapped.reads.bam"
 ```
 
-Bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the ST tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
+bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the ST tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 ```
 results/{sample_name}/align/{sample_name}.decorated.bam"
 ```
 
-# bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are constructed from a representative read name (i.e. `pbmarkdup` du tag) with "_consensus" appended. The <pending name> tag indicates the number of reads that were used to construct the consensus. 
+bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are constructed from a representative read name (i.e. `pbmarkdup` du tag) with "_consensus" appended. The <pending name> tag indicates the number of reads that were used to construct the consensus. 
 ```
 results/{sample_name}/align/{sample_name}.consensus.bam 
 ```
@@ -93,7 +93,7 @@ results/{sample_name}/align/{sample_name}.consensus.bam
 
 ### Data files
 
-# for each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
+For each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
 results/{sample_name}/qc/{sample_name}.detailed_targeting_metrics.tbl.gz 
 results/{sm}/qc/{sm}.summary_targeting_metrics.tbl # for each region, contains the number of reads in each category
 
