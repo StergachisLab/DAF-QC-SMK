@@ -50,7 +50,7 @@ test_sample	/my/bam/path/file.bam	chr4:3073138-3075853,chr3:179228176-179236561
 ``` 
 
 `config.yaml` Config file that includes paths to sample table and reference genome and specifies custom parameters.
-See `config.config.yaml` for a template.
+See `config/config.yaml` for a template.
 ```
 ref: /my/ref/path/genome.fa # path to a reference fasta
 manifest: config/config.tbl # table with samples to process
@@ -83,18 +83,40 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 
 
 ### Data files
+`results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz` For each region, contains a comma-separated list of group names designated by `pbmarkdup` and number of reads in each duplicate group. Note that only full-length, top/bottom strand reads are considered, so numbers may differ from the distribution of `ds` tags from pbmarkdup.
+```
+chrom   start   end     du_tags values
+chr4    3073138 3075853 m21034_250307_213248/112462026/ccs,... 100,50,42,....
+```
+
+For the file types below, detailed and summary metrics are provided. Detailed metrics provide all the information used in filtering and strand designation. Summary metrics are provided for plot generation.
+
 `results/{sample_name}/qc/reads/{sample_name}.detailed_targeting_metrics.tbl.gz` For each region, contains read names designated as full-length, non-full length, unaligned, and supplementary/secondary alignment.
+```
+chrom   start   end     full_length_reads       non_full_length_reads   non_primary_reads
+chr4    3073138 3075853 m21034_250307_213248/84281987/ccs,...   m21034_250307_213248/46338585/ccs,...   m21034_250307_213248/115871607/ccs,...
+```
 
 `results/{sm}/qc/{sm}.summary_targeting_metrics.tbl` For each region, contains the number of reads in each category
+```
+chrom   start   end     #_full_length_reads     #_non_full_length_reads #_non_primary_reads     total_fibers in bam(primary+unmapped)
+chr4    3073138 3075853 20837   1746    261     22736
+```
 
-`results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand deamination and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus).
+`results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand overall deamination, 2bp deamination sequence context, and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus). Note that "OC" indicates that the base is not in a 2bp context (i.e. at the end of the read or next to an indel). Context is determined from the reference sequence to avoid ambiguity from deaminated bases.
+```
+read_name       chr     reg_st  reg_end strand_st       strand_end      length  strand  duplicate       mutation_count  deamination_positions   AC_count    AC_deam AC_deam_rate    CC_count        CC_deam    CC_deam_rate    GC_count        GC_deam GC_deam_rate    TC_count        TC_deam TC_deam_rate    OC_count        OC_deam OC_deam_rate    total_deam      total_count     all_deam_rate   mutation_rate
+m21034_250307_213248/84281987/ccs       chr4    3073138 3075853 3073130 3075848 2731    CT      None    3.0     176,193,202,203,214,217,489,490,500,501,503,505,506,508,509,510,513,514,519,526,647,657,659,667,669,673,674,675,677,679,680,681,682,693,694,695,844,854,856,860,862,864,869,870,871,872,873,875,876,892,893,898,899,900,901,904,905,908,923,924,929,942,949,950,951,952,954,958,965,966,968,970,972,973,976,977,995,996,997,998,1000,1001,1002,1005,1007,1008,1011,1012,1016,1017,1018,1019,1021,1022,1023,1024,1028,1029,1030,1034,1035,1042,1045,1046,1048,1049,1050,1051,1053,1054,1055,1056,1058,1065,1066,1069,1070,1077,1078,1079,1080,1083,1084,1085,1086,1092,1111,1113,1129,1135,1136,1137,1159,1234,1249,1250,1252,1259,1260,1262,1264,1270,1272,1275,1281,1292,1294,1295,1296,1297,1302,1306,1308,1310,1311,1315,1316,1317,1318,1321,1322,1323,1325,1327,1328,1335,1336,1337,1338,1342,1343,1346,1361,1364,1370,1376,1377,1381,1391,1400,1406,1448,1474,1475,1543,1546,1559,1561,1562,1573,1597,1600,1602,1608,1617,1618,1807,2261,2327,2434,2436,2495,2506,2512,2521,2537,2552,2555,2556,2574      105.0   16.0    0.1523809523809524      421.0   87.0    0.20665083135391923     322.0   53.0    0.16459627329192547     166.0   54.0       0.3253012048192771      2.0     0.0     0.0     210.0   1016.0  0.20669291338582677     0.0010984987184181618
+```
 
-`results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region and strand type for full length reads or consensus sequences
-
+`results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region, strand type, and 2 bp context for full length reads or consensus sequences. "OC" column indicates 
+```
+chrom   reg_start       reg_end strand  count   mutation_rate   all_deam_rate   AC_deam_rate    CC_deam_rate    GC_deam_rate    TC_deam_rate    OC_deam_rate
+chr4    3073138 3075853 CT      15855   0.0010984987184181618,0.0007334066740007334,... 0.30912659470068693,0.2992125984251969,... 0.23076923076923078,0.16831683168316833... 0.2327790973871734,0.34523809523809523    0.36335403726708076,0.21846153846153846,... 0.45180722891566266,0.47305389221556887,... 0,0.25,0,...
+```
 
 ### Plots
-
-
+(WILL BE UPDATED SOON)
 
 
 ## Acknowledgements

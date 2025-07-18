@@ -73,6 +73,8 @@ plt.bar("Off-Target", off_target, label="Off-target Reads", alpha=0.7, color="gr
 plt.ylabel("Proportion of Reads")
 plt.title("Targeting Metrics by Region")
 plt.legend(bbox_to_anchor=(1, 0), loc="lower left")
+# rotate x labels 45 degrees
+plt.xticks(rotation=45, ha="right")
 # Remove outside frame
 plt.gca().spines["top"].set_visible(False)
 plt.gca().spines["right"].set_visible(False)
