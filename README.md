@@ -116,7 +116,7 @@ chr4    3073138 3075853 CT      15855   0.0010984987184181618,0.0007334066740007
 ```
 
 ### Plots
-The easiest way to visualize plots is through the HTML dashboard in `results/{sample_name}/qc/{sample_name}.dashboard.html`. Plots are also avaiable as individual pdf files in `results/{sample_name}/qc/{type}/plots/` where type is either `reads` or `consensus`.
+The easiest way to visualize plots is through the HTML dashboard in `results/{sample_name}/qc/{sample_name}.dashboard.html`. Plots are also avaiable as individual pdf files in `results/{sample_name}/qc/{type}/plots/` where type is either `reads` or `consensus`. Note that the plots are embedded in the HTML, so it is not necessary to include individual PDF files when copying to your local machine or sharing results.
 
 Plots include targeting efficiency, deamination rate, strand calling, enzyme bias, mutation rate, and deduplication (PacBio only) at the read level, and deamination rate, strand calling, enzyme bias, and mutation rate at the consensus level (if consensus is generated).
 
