@@ -227,6 +227,20 @@ rule build_consensus:
         "../scripts/build_consensus.py"
 
 
+rule make_dashboard:
+    input:
+        pdfs=get_qc_plot_names
+    params:
+        sample_name="{sm}",
+        regions=get_input_regs
+    output:
+        dashboard="results/{sm}/qc/{sm}_dashboard.html"
+    conda:
+        "../envs/python.yaml"
+    script:
+        "../scripts/create_dashboard.py"
+
+
 
 
 # Targeting metrics for consensus files?

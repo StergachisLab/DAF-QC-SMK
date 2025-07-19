@@ -122,3 +122,26 @@ def get_targeting_data(wc):
         return f"results/{wc.sm}/qc/reads/{wc.sm}.detailed_targeting_metrics.tbl.gz"
     else:
         return []
+
+
+def get_qc_plot_names(wc):
+    types = ["reads"] if CONSENSUS is False else ["reads", "consensus"]
+    plots = []
+    
+    sample = wc.sm
+    regions = MANIFEST.loc[sample, "regs"].strip().split(",")
+
+    plots.append(f"results/{sample}/qc/reads/plots/{sample}.targeting_plot.pdf")
+    
+    for region in regions:
+        reg_label = region.replace(":", "_").replace("-", "_")
+        prefix = f"results/{sample}/qc"
+
+        for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
+            for item in types:
+                plots.append(f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf")
+        
+        if PLATFORM != "ont":
+            plots.append(f"{prefix}/reads/plots/{sample}.{reg_label}.duplication_groups.pdf")
+    
+    return plots

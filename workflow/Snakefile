@@ -37,7 +37,8 @@ if PLATFORM == "ont":
             expand(rules.plot_targeting_qc.output, sm=MANIFEST.index, type="reads"),
             expand(rules.filter_bam.output, sm=MANIFEST.index),
             expand(rules.decorate_strands.output, sm=MANIFEST.index),
-            expand(rules.index_decorated.output, sm=MANIFEST.index)
+            expand(rules.index_decorated.output, sm=MANIFEST.index),
+            expand(rules.make_dashboard.output, sm=MANIFEST.index)
 
 elif CONSENSUS is False:
     rule all:
@@ -52,7 +53,8 @@ elif CONSENSUS is False:
             expand(rules.decorate_strands.output, sm=MANIFEST.index),
             expand(rules.index_decorated.output, sm=MANIFEST.index),
             expand(rules.deduplication_metrics.output, sm=MANIFEST.index),
-            get_deduplication_qc_plot_paths()
+            get_deduplication_qc_plot_paths(),
+            expand(rules.make_dashboard.output, sm=MANIFEST.index)
 
 
 else:
@@ -70,4 +72,5 @@ else:
             expand(rules.index_decorated.output, sm=MANIFEST.index),
             expand(rules.deduplication_metrics.output, sm=MANIFEST.index),
             get_deduplication_qc_plot_paths(),
-            expand(rules.build_consensus.output, sm=MANIFEST.index)
+            expand(rules.build_consensus.output, sm=MANIFEST.index),
+            expand(rules.make_dashboard.output, sm=MANIFEST.index)

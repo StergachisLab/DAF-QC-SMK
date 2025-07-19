@@ -9,3 +9,4 @@ dependencies:
   - pandas==1.4 # pandas versions later than this have cxx errors
   - matplotlib==3.10.3
   - pyabpoa==1.5.4
+  - panel==1.7.4
