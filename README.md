@@ -83,7 +83,7 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 
 
 ### Data files
-`results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz` For each region, contains a comma-separated list of group names designated by `pbmarkdup` and number of reads in each duplicate group. Note that only full-length, top/bottom strand reads are considered, so numbers may differ from the distribution of `ds` tags from pbmarkdup.
+`results/{sample_name}/qc/reads/{sample_name}.deduplication_metrics.tbl.gz` For each region, contains a comma-separated list of group names designated by `pbmarkdup` and number of reads in each duplicate group. Note that only full-length, top/bottom strand reads are considered, so numbers may differ from the distribution of `ds` tags from pbmarkdup.
 ```
 chrom   start   end     du_tags values
 chr4    3073138 3075853 m21034_250307_213248/112462026/ccs,... 100,50,42,....
@@ -97,35 +97,30 @@ chrom   start   end     full_length_reads       non_full_length_reads   non_prim
 chr4    3073138 3075853 m21034_250307_213248/84281987/ccs,...   m21034_250307_213248/46338585/ccs,...   m21034_250307_213248/115871607/ccs,...
 ```
 
-`results/{sm}/qc/{sm}.summary_targeting_metrics.tbl` For each region, contains the number of reads in each category
+`results/{sample_name}/qc/{sample_name}.summary_targeting_metrics.tbl` For each region, contains the number of reads in each category
 ```
 chrom   start   end     #_full_length_reads     #_non_full_length_reads #_non_primary_reads     total_fibers in bam(primary+unmapped)
 chr4    3073138 3075853 20837   1746    261     22736
 ```
 
-`results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand overall deamination, 2bp deamination sequence context, and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus). Note that "OC" indicates that the base is not in a 2bp context (i.e. at the end of the read or next to an indel). Context is determined from the reference sequence to avoid ambiguity from deaminated bases.
+`results/{sample_name}/qc/{type}/{sample_name}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand overall deamination, 2bp deamination sequence context, and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus). Note that "OC" indicates that the base is not in a 2bp context (i.e. at the end of the read or next to an indel). Context is determined from the reference sequence to avoid ambiguity from deaminated bases.
 ```
 read_name       chr     reg_st  reg_end strand_st       strand_end      length  strand  duplicate       mutation_count  deamination_positions   AC_count    AC_deam AC_deam_rate    CC_count        CC_deam    CC_deam_rate    GC_count        GC_deam GC_deam_rate    TC_count        TC_deam TC_deam_rate    OC_count        OC_deam OC_deam_rate    total_deam      total_count     all_deam_rate   mutation_rate
 m21034_250307_213248/84281987/ccs       chr4    3073138 3075853 3073130 3075848 2731    CT      None    3.0     176,193,...      105.0   16.0    0.1523809523809524      421.0   87.0    0.20665083135391923     322.0   53.0    0.16459627329192547     166.0   54.0       0.3253012048192771      2.0     0.0     0.0     210.0   1016.0  0.20669291338582677     0.0010984987184181618
 ```
 
-`results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region, strand type, and 2 bp context for full length reads or consensus sequences. "OC" column indicates 
+`results/{sample_name}/qc/{type}/{sample_name}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region, strand type, and 2 bp context for full length reads or consensus sequences. "OC" column indicates 
 ```
 chrom   reg_start       reg_end strand  count   mutation_rate   all_deam_rate   AC_deam_rate    CC_deam_rate    GC_deam_rate    TC_deam_rate    OC_deam_rate
 chr4    3073138 3075853 CT      15855   0.0010984987184181618,0.0007334066740007334,... 0.30912659470068693,0.2992125984251969,... 0.23076923076923078,0.16831683168316833... 0.2327790973871734,0.34523809523809523    0.36335403726708076,0.21846153846153846,... 0.45180722891566266,0.47305389221556887,... 0,0.25,0,...
 ```
 
 ### Plots
-(WILL BE UPDATED SOON)
+The easiest way to visualize plots is through the HTML dashboard in `results/{sample_name}/qc/{sample_name}.dashboard.html`. Plots are also avaiable as individual pdf files in `results/{sample_name}/qc/{type}/plots/` where type is either `reads` or `consensus`.
+
+Plots include targeting efficiency, deamination rate, strand calling, enzyme bias, mutation rate, and deduplication (PacBio only) at the read level, and deamination rate, strand calling, enzyme bias, and mutation rate at the consensus level (if consensus is generated).
 
 
 ## Acknowledgements
 
 Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and for common functions borrowed from here workflow/rules/common.smk
-
-
-## TODO
-Convert to CRAM files where possible
-Note that input of a region with no reads will not fail but will omit that region from plots. Add warning that prints to file if this happens.
-Eventually, call nucs, FIRE/accessibility?
-test

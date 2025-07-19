@@ -234,7 +234,7 @@ rule make_dashboard:
         sample_name="{sm}",
         regions=get_input_regs
     output:
-        dashboard="results/{sm}/qc/{sm}_dashboard.html"
+        dashboard="results/{sm}/qc/{sm}.dashboard.html"
     conda:
         "../envs/python.yaml"
     script:
