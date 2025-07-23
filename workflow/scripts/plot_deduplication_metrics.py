@@ -5,10 +5,7 @@ import matplotlib.pyplot as plt
 summary_path = snakemake.input.summary_metrics
 region = snakemake.params.region
 consensus_min_reads = snakemake.params.consensus_min_reads
-#output_reads = snakemake.output.duplication_reads
 output_groups = snakemake.output.duplication_groups
-
-
 
 #summary_path = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/PS01031/qc/reads/PS01031.deduplication_metrics.tbl.gz"
 #region = "chr5_34760400_34763141"
@@ -100,50 +97,3 @@ else:
     plt.ylabel('Proportion of groups')
     plt.savefig(output_groups, format='pdf')
 #    plt.show()
-
-
-
-'''
-
-    median_duplicates = np.median(dups_only) if dups_only else 0
-    duplicates_10 = np.percentile(dups_only, 10) if dups_only else 0
-    duplicates_90 = np.percentile(dups_only, 90) if dups_only else 0
-
-
-    upper_limit = 150
-    dups_only  = [x if x <= upper_limit else upper_limit for x in dups_only]
-
-
-
-    fig = plt.figure(figsize=(10, 6))
-    weights = dups_only  # Normalize histogram
-    plt.hist(dups_only, bins=50, color='blue', alpha=0.7, weights=weights)
-    plt.xlim(0, upper_limit)
-
-    plt.axvline(median_duplicates, color='black', linestyle='dashed', linewidth=1, label=f'Median: {median_duplicates:.2f}')
-    plt.axvline(duplicates_10, color='black', linestyle='dashed', linewidth=1, label=f'10th Percentile: {duplicates_10:.2f}')
-    plt.axvline(duplicates_90, color='black', linestyle='dashed', linewidth=1, label=f'90th Percentile: {duplicates_90:.2f}')
-
-    # add text label next to median and quartile lines
-    # Get y-axis limits for positioning text
-    y_min, y_max = plt.ylim()
-
-    x_min, x_max = plt.xlim()
-
-    # Add text labels
-    plt.text(median_duplicates, y_max + y_max/80, '50%', rotation=90, va='bottom')
-    plt.text(duplicates_10, y_max + y_max/80, '10%', rotation=90, va='bottom')
-    plt.text(duplicates_90, y_max + y_max/80, '90%', rotation=90, va='bottom')
-
-    plt.text(x_max - x_max/4, y_max * 0.9, f'Median: {median_duplicates:.2f}', color='black', fontsize=10)
-    plt.text(x_max - x_max/4, y_max * 0.8, f'10th Percentile: {duplicates_10:.2f}', color='black', fontsize=10)
-    plt.text(x_max - x_max/4, y_max * 0.7, f'90th Percentile: {duplicates_90:.2f}', color='black', fontsize=10)
-
-    plt.title(f'Duplicate Counts {label}')
-    plt.xlabel('Duplicate Counts')
-    plt.ylabel('Frequency')
-
-#    plt.savefig(output_path, format='pdf')
-    plt.show()
-
-'''

@@ -8,17 +8,18 @@ rule deduplicate:
     conda:
         "../envs/cmd.yaml"
     output:
-        dedup_bam=temp("temp/{sm}/align/{sm}.reads.bam"),
-        dup_index=temp("temp/{sm}/align/{sm}.reads.bam.bai")
+        dedup_bam="temp/{sm}/align/{sm}.reads.bam",
+        dup_index="temp/{sm}/align/{sm}.reads.bam.bai",
+        pb_index="temp/{sm}/align/{sm}.reads.bam.pbi"
     log:
         "logs/{sm}/dedup/{sm}.dedup.log"
-    threads: 8
+    threads: 20
     benchmark:
         "benchmark/{sm}.benchmark.txt"
     shell:
         """
         mkdir -p temp/{wildcards.sm}/align logs/{wildcards.sm}/dedup && \
-        pbmarkdup -j {threads} --end-length {params.dup_end_len}  --min-id-perc {params.min_id} --log-file {log} {input} {output.dedup_bam} && \
+        pbmarkdup -j {threads} --end-length {params.dup_end_len}  --min-id-perc {params.min_id} --log-file {log} {input.data} {output.dedup_bam} && \
         samtools index {output.dedup_bam}
         """
     
@@ -35,7 +36,7 @@ if PLATFORM == "pacbio":
         output:
             aligned_bam="results/{sm}/align/{sm}.mapped.{type}.bam",
             index="results/{sm}/align/{sm}.mapped.{type}.bam.bai"
-        threads: 8
+        threads: 16
         shell:
             """
             mkdir -p results/{wildcards.sm}/align && \
@@ -55,7 +56,7 @@ elif PLATFORM == "ont":
         output:
             aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
             index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
-        threads: 8
+        threads: 16
         shell:
             """
             mkdir -p results/{wildcards.sm}/align && \
@@ -137,10 +138,10 @@ rule filter_bam:
     params:
         sample_size=DECORATED_SAMPLESIZE
     output:
-        filtered_bam="temp/{sm}/align/{sm}.filtered.bam",
-        index="temp/{sm}/align/{sm}.filtered.bam.bai",
-        sample_bam="temp/{sm}/align/{sm}.sample.bam",
-        sample_index="temp/{sm}/align/{sm}.sample.bam.bai"
+        filtered_bam=temp("temp/{sm}/align/{sm}.filtered.bam"),
+        index=temp("temp/{sm}/align/{sm}.filtered.bam.bai"),
+        sample_bam=temp("temp/{sm}/align/{sm}.sample.bam"),
+        sample_index=temp("temp/{sm}/align/{sm}.sample.bam.bai")
     conda:
         "../envs/cmd.yaml"
     shell:
@@ -162,6 +163,7 @@ rule filter_bam:
 rule decorate_strands:
     input:
         bam="temp/{sm}/align/{sm}.sample.bam",
+        bai="temp/{sm}/align/{sm}.sample.bam.bai",
         seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
     output:
         decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam"
@@ -187,7 +189,8 @@ rule index_decorated:
 
 rule deduplication_metrics:
     input:
-       bam="temp/{sm}/align/{sm}.filtered.bam"
+       bam="temp/{sm}/align/{sm}.filtered.bam",
+       bai="temp/{sm}/align/{sm}.filtered.bam.bai",
     params:
         regions= get_input_regs
     output:
@@ -216,7 +219,8 @@ rule plot_deduplication_metrics:
 
 rule build_consensus:
     input:
-        bam="temp/{sm}/align/{sm}.filtered.bam"
+        bam="temp/{sm}/align/{sm}.filtered.bam",
+        bai="temp/{sm}/align/{sm}.filtered.bam.bai"
     params:
         consensus_min_reads=CONSENSUS_MIN_READS
     output:
@@ -243,12 +247,6 @@ rule make_dashboard:
 
 
 
-# Targeting metrics for consensus files?
 # add rule to save input parameters to smk folder
 # add logs where needed
-# fix start end coordinates in strand metrics to clarify fiber coordinates vs target coordinates
 # As an optional note, can add script on github to decorate the consensus and merge it with the filtered file.
-# add total coverage of targets
-# add option to require a certain amount of CT or GA to call a strand
-# add proportion or count of reads that are above cutoff on deduplication plot
-# subsample for decorated and sequencing metrics? 

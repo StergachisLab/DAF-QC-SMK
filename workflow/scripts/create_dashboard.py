@@ -52,7 +52,7 @@ def parse_filenames(filenames, regions):
             
         pdf_base64 = base64.b64encode(pdf_data).decode()
 
-        name = pdf_path.stem.split('.')
+        name = pdf_path.stem
 
         region = next((r for r in regions if r in name), "All")
 
@@ -61,7 +61,7 @@ def parse_filenames(filenames, regions):
         readtype = next((rt for rt in ["reads", "consensus"] if rt in name), "")
 
 
-        plot_name = f"{readtype}: {plot_type[category]}" if readtype else plot_type[category]
+        plot_name = f"{readtype.capitalize()}: {plot_type[category]}" if readtype else plot_type[category]
 
 
         pdfs[pdf_path.stem] = {

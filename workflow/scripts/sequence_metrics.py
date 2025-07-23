@@ -25,7 +25,6 @@ summary_metrics = snakemake.output.summary_metrics
 #summary_metrics = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test_manual.summary_metrics_optimized.tsv.gz"
 
 
-
 def parse_region(region):
     # region should be in chr:start-end format
     chrom, positions = region.split(':')
@@ -245,13 +244,19 @@ tables=[]
 if len(targeting_metrics) > 0:
 
     targeting_df = pd.read_csv(targeting_metrics, sep='\t', compression='gzip')
+
+    if targeting_df['full_length_reads'].isnull().all():
+        raise ValueError("No full length reads found in targeting metrics file. \n" \
+        "Check that the correct targeted regions are specified in your manifest table.\n"
+        "Set end_tolerance to a larger value in your config file if the regions are not exact matches to the BAM file.")
+
     for region in regions:
         
         chrom, start, end = parse_region(region)
 
         full_length_reads = targeting_df[(targeting_df['chrom'] == chrom) & (targeting_df['start'] == start) & (targeting_df['end'] == end)]['full_length_reads'].values
 
-        if full_length_reads is None or full_length_reads[0] is np.nan or len(full_length_reads) == 0:
+        if full_length_reads is None or len(full_length_reads) == 0 or pd.isna(full_length_reads[0]):
             continue
 
         full_length_reads = full_length_reads[0].split(',')
