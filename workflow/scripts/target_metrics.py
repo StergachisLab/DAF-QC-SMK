@@ -10,17 +10,16 @@ output_detailed = snakemake.output.detailed
 output_summary = snakemake.output.summary
 
 # for testing and troubleshooting
-#bam_path="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test_2/align/htt_test_2.mapped.reads.bam"
-#regions=["chr4:3073138-3075853", "chr3:179228176-179236561"]
-#output_detailed="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test/detailed-tar.tsv.gz"
-#output_summary="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test/summary-tar.tsv.gz"
+# bam_path="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test_2/align/htt_test_2.mapped.reads.bam"
+# regions=["chr4:3073138-3075853", "chr3:179228176-179236561"]
+# output_detailed="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test/detailed-tar.tsv.gz"
+# output_summary="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test/summary-tar.tsv.gz"
 
 def parse_region(region):
     # region should be in chr:start-end format
     chrom, positions = region.split(":")
     start, end = map(int, positions.split("-"))
     return chrom, start, end
-
 
 def region_metrics_table(bam, chrom, start, end, tolerance=30):
     # Filters for reads that align at the expected ends (+/- tolerace)
@@ -32,11 +31,11 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
     non_full_length_reads_clip = []
     non_primary_reads = []
     read_count = 0
-#    map_start, map_end = None, None
+    #    map_start, map_end = None, None
 
     for read in bam.fetch(chrom, start, end):
         read_count += 1
-        
+
         map_start, map_end = read.reference_start, read.reference_end
         # skipping reads that are unmapped, secondary, or supplementary
         if read.is_unmapped or read.is_secondary or read.is_supplementary:
@@ -44,8 +43,6 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
             continue
 
         # check for full length alignments
-
-
 
         map_start_diff = map_start - start
         map_end_diff = map_end - end
@@ -69,7 +66,6 @@ def region_metrics_table(bam, chrom, start, end, tolerance=30):
             full_length_reads.append(read.query_name)
         else:
             non_full_length_reads_clip.append(read.query_name)
-
 
     # Output results as dataframe
     read_data = pd.DataFrame(
