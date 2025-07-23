@@ -6,6 +6,10 @@ name = "SmkTemplate"
 platforms = ["osx-64", "linux-64"]
 version = "0.0.1"
 
+[tool.ruff.lint]
+builtins = ["snakemake"]
+
+
 [tasks]
 fmt = "ruff format . && taplo format pixi.toml && snakefmt workflow/"
 test = { cmd = [
