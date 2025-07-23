@@ -92,7 +92,8 @@ rule plot_targeting_qc:
     params:
         regions= get_input_regs
     output:
-        plot= "results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf"
+        plot= "results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf",
+        metrics_txt="results/{sm}/qc/reads/plots/{sm}.targeting_plot.txt"
     conda:
         "../envs/python.yaml"
     script:
