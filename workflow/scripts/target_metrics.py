@@ -135,6 +135,7 @@ regions = snakemake.params.regions
 end_tolerance = snakemake.params.end_tolerance
 output_detailed = snakemake.output.detailed
 output_summary = snakemake.output.summary
+threads = snakemake.threads
 
 # for testing and troubleshooting
 # bam_path="/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test_2/align/htt_test_2.mapped.reads.bam"
@@ -145,7 +146,7 @@ output_summary = snakemake.output.summary
 
 os.makedirs(os.path.dirname(output_detailed), exist_ok=True)
 
-pybam = pysam.AlignmentFile(bam_path, "rb")
+pybam = pysam.AlignmentFile(bam_path, "rb", threads=threads)
 
 tables = []
 

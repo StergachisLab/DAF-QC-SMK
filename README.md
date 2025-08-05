@@ -79,7 +79,7 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 
 `results/{sample_name}/align/{sample_name}.decorated.bam` bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the `ST` tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 
-`results/{sample_name}/align/{sample_name}.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are constructed from a representative read name (i.e. `pbmarkdup` du tag) with "_consensus" appended. The <pending name> tag indicates the number of reads that were used to construct the consensus. 
+`results/{sample_name}/align/{sample_name}.mapped.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are `pbmarkdup` `du` tags with "_consensus" appended. The `du` tag is also included. The `zm` tag is arbitrarily set to that of the `du` tag name. The `dc` tag indicates the number of reads that were used to construct the consensus. For visualization, the `YC` tag colors consensus reads pink.
 
 
 ### Data files
@@ -105,8 +105,8 @@ chr4    3073138 3075853 20837   1746    261     22736
 
 `results/{sample_name}/qc/{type}/{sample_name}.detailed_seq_metrics.{type}.tbl.gz` Contains strand by strand overall deamination, 2bp deamination sequence context, and mutation metrics for full length reads (type=reads) or consensus sequences (type=consensus). Note that "OC" indicates that the base is not in a 2bp context (i.e. at the end of the read or next to an indel). Context is determined from the reference sequence to avoid ambiguity from deaminated bases.
 ```
-read_name       chr     reg_st  reg_end strand_st       strand_end      length  strand  duplicate       mutation_count  deamination_positions   AC_count    AC_deam AC_deam_rate    CC_count        CC_deam    CC_deam_rate    GC_count        GC_deam GC_deam_rate    TC_count        TC_deam TC_deam_rate    OC_count        OC_deam OC_deam_rate    total_deam      total_count     all_deam_rate   mutation_rate
-m21034_250307_213248/84281987/ccs       chr4    3073138 3075853 3073130 3075848 2731    CT      None    3.0     176,193,...      105.0   16.0    0.1523809523809524      421.0   87.0    0.20665083135391923     322.0   53.0    0.16459627329192547     166.0   54.0       0.3253012048192771      2.0     0.0     0.0     210.0   1016.0  0.20669291338582677     0.0010984987184181618
+read_name       chr     reg_st  reg_end strand_st       strand_end      length  strand  duplicate       mutation_count  deamination_positions   AC_count    AC_deam AC_deam_rate    CC_count        CC_deam    CC_deam_rate    GC_count        GC_deam GC_deam_rate    TC_count        TC_deam TC_deam_rate    OC_count        OC_deam OC_deam_rate    total_count      total_deam     all_deam_rate   mutation_rate
+m21034_250307_213248/84281987/ccs       chr4    3073138 3075853 3073130 3075848 2731    CT      None    3.0     176,193,...      105   16    0.1523809523809524      421   87    0.20665083135391923     322   53    0.16459627329192547     166   54       0.3253012048192771      2     0     0.0     1016	210   0.20669291338582677     0.0010984987184181618
 ```
 
 `results/{sample_name}/qc/{type}/{sample_name}.summary_seq_metrics.{type}.tbl.gz` Contains proportions of deaminations by region, strand type, and 2 bp context for full length reads or consensus sequences. "OC" column indicates 

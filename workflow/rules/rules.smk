@@ -1,18 +1,18 @@
 # Basic rules
 rule deduplicate:
     input:
-        data= get_input_file
+        data=get_input_file,
     params:
         dup_end_len=DUP_END_LENGTH,
-        min_id=MIN_ID_PERC
+        min_id=MIN_ID_PERC,
     conda:
         "../envs/cmd.yaml"
     output:
         dedup_bam="temp/{sm}/align/{sm}.reads.bam",
         dup_index="temp/{sm}/align/{sm}.reads.bam.bai",
-        pb_index="temp/{sm}/align/{sm}.reads.bam.pbi"
+        pb_index="temp/{sm}/align/{sm}.reads.bam.pbi",
     log:
-        "logs/{sm}/dedup/{sm}.dedup.log"
+        "logs/{sm}/dedup/{sm}.dedup.log",
     threads: 40
     benchmark:
         "benchmark/{sm}.dedup_benchmark.txt"
@@ -25,17 +25,18 @@ rule deduplicate:
 
 
 if PLATFORM == "pacbio":
-# TODO add option for alignment and check if bam is aligned
-# Output this as a CRAM file instead
+
+    # TODO add option for alignment and check if bam is aligned
+    # Output this as a CRAM file instead
     rule align:
         input:
-            fa= REF,
-            data= "temp/{sm}/align/{sm}.{type}.bam"
+            fa=REF,
+            data="temp/{sm}/align/{sm}.{type}.bam",
         conda:
             "../envs/cmd.yaml"
         output:
             aligned_bam="results/{sm}/align/{sm}.mapped.{type}.bam",
-            index="results/{sm}/align/{sm}.mapped.{type}.bam.bai"
+            index="results/{sm}/align/{sm}.mapped.{type}.bam.bai",
         threads: 16
         benchmark:
             "benchmark/{sm}.align_benchmark.{type}.txt"
@@ -48,15 +49,16 @@ if PLATFORM == "pacbio":
             """
 
 elif PLATFORM == "ont":
+
     rule align_ont:
         input:
             fa=REF,
-            data=get_input_file
+            data=get_input_file,
         conda:
             "../envs/cmd.yaml"
         output:
             aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
-            index="results/{sm}/align/{sm}.mapped.reads.bam.bai"
+            index="results/{sm}/align/{sm}.mapped.reads.bam.bai",
         threads: 16
         benchmark:
             "benchmark/{sm}.align_benchmark_ont.txt"
@@ -76,13 +78,13 @@ elif PLATFORM == "ont":
 
 rule targeting_qc:
     input:
-        data="results/{sm}/align/{sm}.mapped.reads.bam"
+        data="results/{sm}/align/{sm}.mapped.reads.bam",
     params:
-        regions= get_input_regs,
-        end_tolerance=END_TOLERANCE
+        regions=get_input_regs,
+        end_tolerance=END_TOLERANCE,
     output:
         detailed="results/{sm}/qc/reads/{sm}.detailed_targeting_metrics.tbl.gz",
-        summary="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl"
+        summary="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl",
     threads: 8
     benchmark:
         "benchmark/{sm}.targetqc_benchmark.txt"
@@ -94,12 +96,12 @@ rule targeting_qc:
 
 rule plot_targeting_qc:
     input:
-        targeting_metrics= "results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl"
+        targeting_metrics="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl",
     params:
-        regions= get_input_regs
+        regions=get_input_regs,
     output:
-        plot= "results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf",
-        metrics_txt="results/{sm}/qc/reads/plots/{sm}.targeting_plot.txt"
+        plot="results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf",
+        metrics_txt="results/{sm}/qc/reads/plots/{sm}.targeting_plot.txt",
     benchmark:
         "benchmark/{sm}.targetplot_benchmark.txt"
     conda:
@@ -111,14 +113,14 @@ rule plot_targeting_qc:
 rule sequence_qc:
     input:
         data="results/{sm}/align/{sm}.mapped.{type}.bam",
-        targeting_data=get_targeting_data
+        targeting_data=get_targeting_data,
     params:
-        regions= get_input_regs,
-        chimera_cutoff = CHIMERA_CUTOFF,
-        min_deamination_count = MIN_DEAMINATION_COUNT
+        regions=get_input_regs,
+        chimera_cutoff=CHIMERA_CUTOFF,
+        min_deamination_count=MIN_DEAMINATION_COUNT,
     output:
         read_metrics="results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz",
-        summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz"
+        summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz",
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -130,17 +132,17 @@ rule sequence_qc:
 
 rule plot_seq_qc:
     input:
-        summary_metrics = "results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz"
+        summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz",
     params:
-        region = "{region}",
+        region="{region}",
     output:
-        deam_rate = "results/{sm}/qc/{type}/plots/{sm}.{region}.deam_rate.{type}.pdf",
-        mut_rate = "results/{sm}/qc/{type}/plots/{sm}.{region}.mut_rate.{type}.pdf",
-        strandtype = "results/{sm}/qc/{type}/plots/{sm}.{region}.strandtype.{type}.pdf",
-        bias = "results/{sm}/qc/{type}/plots/{sm}.{region}.bias.{type}.pdf",
-        deam_rate_table = "results/{sm}/qc/{type}/plots/{sm}.{region}.deam_rate.{type}.txt", # for testing
-        mut_rate_table = "results/{sm}/qc/{type}/plots/{sm}.{region}.mut_rate.{type}.txt",
-        bias_table = "results/{sm}/qc/{type}/plots/{sm}.{region}.bias.{type}.txt"
+        deam_rate="results/{sm}/qc/{type}/plots/{sm}.{region}.deam_rate.{type}.pdf",
+        mut_rate="results/{sm}/qc/{type}/plots/{sm}.{region}.mut_rate.{type}.pdf",
+        strandtype="results/{sm}/qc/{type}/plots/{sm}.{region}.strandtype.{type}.pdf",
+        bias="results/{sm}/qc/{type}/plots/{sm}.{region}.bias.{type}.pdf",
+        deam_rate_table="results/{sm}/qc/{type}/plots/{sm}.{region}.deam_rate.{type}.txt",  # for testing
+        mut_rate_table="results/{sm}/qc/{type}/plots/{sm}.{region}.mut_rate.{type}.txt",
+        bias_table="results/{sm}/qc/{type}/plots/{sm}.{region}.bias.{type}.txt",
     conda:
         "../envs/python.yaml"
     benchmark:
@@ -152,14 +154,14 @@ rule plot_seq_qc:
 rule filter_bam:
     input:
         bam="results/{sm}/align/{sm}.mapped.reads.bam",
-        seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz"
+        seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz",
     params:
-        sample_size=DECORATED_SAMPLESIZE
+        sample_size=DECORATED_SAMPLESIZE,
     output:
         filtered_bam=temp("temp/{sm}/align/{sm}.filtered.bam"),
         index=temp("temp/{sm}/align/{sm}.filtered.bam.bai"),
         sample_bam=temp("temp/{sm}/align/{sm}.sample.bam"),
-        sample_index=temp("temp/{sm}/align/{sm}.sample.bam.bai")
+        sample_index=temp("temp/{sm}/align/{sm}.sample.bam.bai"),
     threads: 8
     conda:
         "../envs/cmd.yaml"
@@ -187,9 +189,9 @@ rule decorate_strands:
         bai="temp/{sm}/align/{sm}.sample.bam.bai",
         seq_metrics="results/{sm}/qc/reads/{sm}.detailed_seq_metrics.reads.tbl.gz",
         filtered_bam="temp/{sm}/align/{sm}.filtered.bam",
-        filtered_bai="temp/{sm}/align/{sm}.filtered.bam.bai"
+        filtered_bai="temp/{sm}/align/{sm}.filtered.bam.bai",
     output:
-        decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam"
+        decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam",
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -201,9 +203,9 @@ rule decorate_strands:
 
 rule index_decorated:
     input:
-        "results/{sm}/align/{sm}.decorated.reads.bam"
+        "results/{sm}/align/{sm}.decorated.reads.bam",
     output:
-        "results/{sm}/align/{sm}.decorated.reads.bam.bai"
+        "results/{sm}/align/{sm}.decorated.reads.bam.bai",
     conda:
         "../envs/cmd.yaml"
     shell:
@@ -214,12 +216,12 @@ rule index_decorated:
 
 rule deduplication_metrics:
     input:
-       bam="temp/{sm}/align/{sm}.filtered.bam",
-       bai="temp/{sm}/align/{sm}.filtered.bam.bai",
+        bam="temp/{sm}/align/{sm}.filtered.bam",
+        bai="temp/{sm}/align/{sm}.filtered.bam.bai",
     params:
-        regions= get_input_regs
+        regions=get_input_regs,
     output:
-        deduplication_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz"
+        deduplication_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz",
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -231,13 +233,13 @@ rule deduplication_metrics:
 
 rule plot_deduplication_metrics:
     input:
-        summary_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz"
+        summary_metrics="results/{sm}/qc/reads/{sm}.deduplication_metrics.tbl.gz",
     params:
-        region = "{region}",
-        consensus_min_reads = CONSENSUS_MIN_READS
+        region="{region}",
+        consensus_min_reads=CONSENSUS_MIN_READS,
     output:
-        duplication_groups = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.pdf",
-        duplication_table = "results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.txt"
+        duplication_groups="results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.pdf",
+        duplication_table="results/{sm}/qc/reads/plots/{sm}.{region}.duplication_groups.txt",
     conda:
         "../envs/python.yaml"
     benchmark:
@@ -249,11 +251,11 @@ rule plot_deduplication_metrics:
 rule build_consensus:
     input:
         bam="temp/{sm}/align/{sm}.filtered.bam",
-        bai="temp/{sm}/align/{sm}.filtered.bam.bai"
+        bai="temp/{sm}/align/{sm}.filtered.bam.bai",
     params:
-        consensus_min_reads=CONSENSUS_MIN_READS
+        consensus_min_reads=CONSENSUS_MIN_READS,
     output:
-        bam=temp("temp/{sm}/align/{sm}.consensus.bam")
+        bam=temp("temp/{sm}/align/{sm}.consensus.bam"),
     threads: 8
     conda:
         "../envs/python.yaml"
@@ -265,12 +267,12 @@ rule build_consensus:
 
 rule make_dashboard:
     input:
-        pdfs=get_qc_plot_names
+        pdfs=get_qc_plot_names,
     params:
         sample_name="{sm}",
-        regions=get_input_regs
+        regions=get_input_regs,
     output:
-        dashboard="results/{sm}/qc/{sm}.dashboard.html"
+        dashboard="results/{sm}/qc/{sm}.dashboard.html",
     conda:
         "../envs/python.yaml"
     benchmark:
