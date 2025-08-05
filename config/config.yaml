@@ -14,7 +14,7 @@ decorated_samplesize: 5000 # Approximate number of reads to output as decorated 
 # PacBio-specific options. Input should always be bam files.
 dup_end_length: 0 # length to consider for deduplication. 0 will consider the whole read.
 dup_min_id_perc: 99.2 # minimum identity percentage required to mark duplicates
-consensus: False # whether to generate a consensus sequence for each read. Default is true
+consensus: True # whether to generate a consensus sequence for each read. Default is true
 consensus_min_reads: 3 # minimum number of reads required to generate a consensus sequence
 
 # ONT-specific options

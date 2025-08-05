@@ -6,6 +6,7 @@ def get_ref():
         raise ValueError(f"FIRE: reference file {ref} does not exist")
     return os.path.abspath(ref)
 
+
 def get_manifest():
     manifest = config.get("manifest")
     if manifest is None:
@@ -17,26 +18,30 @@ def get_manifest():
     )
     return manifest
 
+
 def get_dup_end_length():
     if "dup_end_length" not in config:
         dup_end_length = 0
     else:
-        dup_end_length=config["dup_end_length"]
+        dup_end_length = config["dup_end_length"]
     return dup_end_length
+
 
 def get_min_id_perc():
     if "min_id_perc" not in config:
         min_id_perc = 99.2
     else:
-        min_id_perc=config["min_id_perc"]
+        min_id_perc = config["min_id_perc"]
     return min_id_perc
+
 
 def get_chimera_cutoff():
     if "chimera_cutoff" not in config:
         chimera_cutoff = 0.9
     else:
-        chimera_cutoff=config["chimera_cutoff"]
+        chimera_cutoff = config["chimera_cutoff"]
     return chimera_cutoff
+
 
 def get_min_deamination_count():
     if "min_deamination_count" not in config:
@@ -45,6 +50,7 @@ def get_min_deamination_count():
         min_deamination_count = config["min_deamination_count"]
     return min_deamination_count
 
+
 def get_end_tolerance():
     if "end_tolerance" not in config:
         end_tolerance = 30
@@ -52,12 +58,14 @@ def get_end_tolerance():
         end_tolerance = config["end_tolerance"]
     return end_tolerance
 
+
 def get_consensus_min_reads():
     if "consensus_min_reads" not in config:
         consensus_min_reads = 3
     else:
-        consensus_min_reads=config["consensus_min_reads"]
+        consensus_min_reads = config["consensus_min_reads"]
     return consensus_min_reads
+
 
 def get_platform():
     if "platform" not in config:
@@ -66,12 +74,14 @@ def get_platform():
         platform = config["platform"]
     return platform
 
+
 def get_consensus():
     if "consensus" not in config:
         consensus = True
     else:
         consensus = config["consensus"]
     return consensus
+
 
 def get_is_fastq():
     if "is_fastq" not in config:
@@ -80,6 +90,7 @@ def get_is_fastq():
         is_fastq = config["is_fastq"]
     return is_fastq
 
+
 def get_decorated_samplesize():
     if "decorated_samplesize" not in config:
         sample_size = 5000
@@ -87,12 +98,15 @@ def get_decorated_samplesize():
         sample_size = config["decorated_samplesize"]
     return sample_size
 
+
 def get_input_file(wc):
     return MANIFEST.loc[wc.sm, "file"]
+
 
 def get_input_regs(wc):
     regions = MANIFEST.loc[wc.sm, "regs"].strip().split(",")
     return regions
+
 
 def get_strand_qc_plot_paths():
     outputs = []
@@ -100,22 +114,26 @@ def get_strand_qc_plot_paths():
     for sample in MANIFEST.index:
         regions = MANIFEST.loc[sample, "regs"].strip().split(",")
         for region in regions:
-            reg_label = region.replace(":","_").replace("-", "_")
+            reg_label = region.replace(":", "_").replace("-", "_")
             prefix = f"results/{sample}/qc"
             for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
                 for item in types:
-                    outputs.append(f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf")
+                    outputs.append(
+                        f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf"
+                    )
     return outputs
+
 
 def get_deduplication_qc_plot_paths():
     outputs = []
     for sample in MANIFEST.index:
         regions = MANIFEST.loc[sample, "regs"].strip().split(",")
         for region in regions:
-            reg_label = region.replace(":","_").replace("-", "_")
+            reg_label = region.replace(":", "_").replace("-", "_")
             prefix = f"results/{sample}/qc/reads/plots/{sample}.{reg_label}"
             outputs.append(f"{prefix}.duplication_groups.pdf")
     return outputs
+
 
 def get_targeting_data(wc):
     if wc.type == "reads":
@@ -127,21 +145,25 @@ def get_targeting_data(wc):
 def get_qc_plot_names(wc):
     types = ["reads"] if CONSENSUS is False else ["reads", "consensus"]
     plots = []
-    
+
     sample = wc.sm
     regions = MANIFEST.loc[sample, "regs"].strip().split(",")
 
     plots.append(f"results/{sample}/qc/reads/plots/{sample}.targeting_plot.pdf")
-    
+
     for region in regions:
         reg_label = region.replace(":", "_").replace("-", "_")
         prefix = f"results/{sample}/qc"
 
         for plot in ["deam_rate", "bias", "mut_rate", "strandtype"]:
             for item in types:
-                plots.append(f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf")
-        
+                plots.append(
+                    f"{prefix}/{item}/plots/{sample}.{reg_label}.{plot}.{item}.pdf"
+                )
+
         if PLATFORM != "ont":
-            plots.append(f"{prefix}/reads/plots/{sample}.{reg_label}.duplication_groups.pdf")
-    
+            plots.append(
+                f"{prefix}/reads/plots/{sample}.{reg_label}.duplication_groups.pdf"
+            )
+
     return plots
