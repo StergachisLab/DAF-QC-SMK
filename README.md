@@ -123,4 +123,4 @@ Plots include targeting efficiency, deamination rate, strand calling, enzyme bia
 
 ## Acknowledgements
 
-Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and for common functions borrowed from here workflow/rules/common.smk
+Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and for common functions borrowed from here [common.smk](workflow/rules/common.smk)
