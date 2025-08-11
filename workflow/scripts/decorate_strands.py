@@ -38,7 +38,7 @@ for read in bam.fetch():
         )
         read_seq[pos] = deam_dictionary[strand]
     new_seq = "".join(read_seq)
-    deam_pos = [pos + 1 for pos in deam_pos]  # convert to 1-based positions
+#    deam_pos = [pos + 1 for pos in deam_pos]  # convert to 1-based positions
     MD = read.get_tag("MD")
 
     quals = read.query_qualities
@@ -47,10 +47,10 @@ for read in bam.fetch():
 
     read.set_tags(
         [
-            ("DA", deam_pos),
-            ("FD", deam_pos[0] if deam_pos else 0, "i"),
-            ("LD", deam_pos[-1] if deam_pos else 0, "i"),
-            ("ST", strand),
+#            ("da", deam_pos),
+#            ("fd", deam_pos[0] if deam_pos else 0, "i"),
+#            ("ld", deam_pos[-1] if deam_pos else 0, "i"),
+            ("st", strand),
             ("MD", MD),
         ]
     )

@@ -77,7 +77,7 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 
 `results/{sample_name}/align/{sample_name}.mapped.reads.bam` Aligned bam containing all primary, supplementary, and unaligned reads with PCR duplicates marked (du and ds tags)
 
-`results/{sample_name}/align/{sample_name}.decorated.bam` bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the `ST` tag, and deaminated positions are stored in the `DA` tags and `FD` and `LD` tags for first and last deaminated position, respectively. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
+`results/{sample_name}/align/{sample_name}.decorated.bam` bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the `st` tag. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 
 `results/{sample_name}/align/{sample_name}.mapped.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are `pbmarkdup` `du` tags with "_consensus" appended. The `du` tag is also included. The `zm` tag is arbitrarily set to that of the `du` tag name. The `dc` tag indicates the number of reads that were used to construct the consensus. For visualization, the `YC` tag colors consensus reads pink.
 
@@ -123,4 +123,4 @@ Plots include targeting efficiency, deamination rate, strand calling, enzyme bia
 
 ## Acknowledgements
 
-Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and for common functions borrowed from here [common.smk](workflow/rules/common.smk)
+Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and pixi.toml, and for common functions borrowed from here [common.smk](workflow/rules/common.smk)
