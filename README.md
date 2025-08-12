@@ -1,8 +1,6 @@
 # DAF-seq processing and QC pipeline
 
-[![Actions Status](https://github.com/mrvollger/SmkTemplate/workflows/CI/badge.svg)](https://github.com/mrvollger/SmkTemplate/actions)
-
-This is a Snakemake project template. The `Snakefile` is under `workflow`.
+[![Actions Status](https://github.com/StephanieBohaczuk/DAF-QC-SMK/workflows/CI/badge.svg)](https://github.com/StephanieBohaczuk/DAF-QC-SMK/actions)
 
 
 ## Install
@@ -123,4 +121,4 @@ Plots include targeting efficiency, deamination rate, strand calling, enzyme bia
 
 ## Acknowledgements
 
-Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and pixi.toml, and for common functions borrowed from here [common.smk](workflow/rules/common.smk)
+Thank you to Mitchell Vollger for providing the template for this Snakemake workflow and pixi.toml, and for some of the common functions in [common.smk](workflow/rules/common.smk)
