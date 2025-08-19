@@ -11,10 +11,11 @@ def extract_du_seqs(pysam_file):
             seq = read.query_sequence
             reads[du].append(seq)
         else:
-            # Reads that give the du tag name are not marked with the du tag, so this is necessary
+            # Default reads, those that give the du tag name, are not marked with the du tag, so this is necessary
             du = read.query_name
             seq = read.query_sequence
-            reads[du].append(seq)
+            reads[du].insert(0, seq)
+#            reads[du].append(seq)
 
     return reads
 
@@ -39,7 +40,20 @@ def collect_consensus(dup_dict, min_read_count=3):
 
     for du in du_names:
         dups_read_count = len(dup_dict[du])
+        
         if dups_read_count < min_read_count:
+            continue
+
+        if dups_read_count == 1:
+            # If only one read, use it as consensus
+            consensus_seq = dup_dict[du][0]
+            dups_consensus.append([du, consensus_seq, dups_read_count])
+            continue
+
+        elif dups_read_count == 2:
+            # Use the pbmarkdup default read, which is the first in the list
+            consensus_seq = dup_dict[du][0]
+            dups_consensus.append([du, consensus_seq, dups_read_count])
             continue
 
         sequences = dup_dict[du]
