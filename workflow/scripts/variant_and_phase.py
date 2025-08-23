@@ -2,7 +2,7 @@ import pysam
 import numpy as np
 import pandas as pd
 from pyfaidx import Fasta
-import pyft
+
 
 ct_bampath = "/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test_data/results/LHL4ZV_3_BRIP1-C5-F.fastq/LHL4ZV_3_BRIP1-C5-F.fastq/align/BRIP1.CT.bam"
 ga_bampath = "/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test_data/results/LHL4ZV_3_BRIP1-C5-F.fastq/LHL4ZV_3_BRIP1-C5-F.fastq/align/BRIP1.GA.bam"
@@ -14,6 +14,7 @@ ga_bam = pysam.AlignmentFile(ga_bampath, "rb")
 #bam = pysam.AlignmentFile(bam_path, "rb")
 #seq_metrics = pd.read_csv("/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/results/htt_test/qc/reads/htt_test.detailed_seq_metrics.reads.tbl.gz", header=0, index_col=0, sep="\t")
 fasta_path = "/mmfs1/gscratch/stergachislab/assemblies/simple-names/hg38.fa"
+output_bam_path = "/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test_data/results/LHL4ZV_3_BRIP1-C5-F.fastq/LHL4ZV_3_BRIP1-C5-F.fastq/align/BRIP1.phased_reads.bam"
 
 fasta = Fasta(fasta_path)
 
@@ -23,7 +24,7 @@ fasta = Fasta(fasta_path)
 #end = 55587077
 chrom = 'chr17'
 start = 61860066
-end = 61865269
+end = 61865269-50
 
 threshold = 0.8
 het_tolerance = 0.3
@@ -142,13 +143,14 @@ for key in het_variants:
     het_variant_list.extend(coordinates_list)
 
 het_variant_list.sort(key=lambda x: x[0])
-het_variant_pos = np.array([pos[0] for pos in het_variant_list])
+het_variant_pos = [pos[0] for pos in het_variant_list]
 het_variant_types = [pos[1] for pos in het_variant_list]
 #het_variant_pos = np.array(np.where(np.any(list(het_variants.values()), axis=0))) + start
 
 
 bases=[]
 read_names = []
+
 for fiber in ga_bam.fetch(chrom, start, end):
     pairs = fiber.get_aligned_pairs(with_seq=True)
     fiber_sequence = fiber.query_sequence
@@ -166,21 +168,141 @@ for fiber in ga_bam.fetch(chrom, start, end):
 
 
 
-variant_df = pd.DataFrame(bases, index=read_names, columns=het_variant_pos)
+ga_variant_df = pd.DataFrame(bases, index=read_names, columns=het_variant_pos)
 
 #haplotype_counts = variant_df[het_variant_pos[0][1:]].value_counts()
 
-grouped = variant_df.groupby(list(variant_df[het_variant_pos[3:-1]].columns))
-haplotype_indices = grouped.groups
-haplotype_counts = grouped.size()
 
 
-filebase = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test_data/results/LHL4ZV_3_BRIP1-C5-F.fastq/LHL4ZV_3_BRIP1-C5-F.fastq/align"
-for haplotype, index in haplotype_indices.items():
-    file_name = f"{filebase}/" + "".join(map(str, haplotype)) + ".GAzids2.txt"
-    with open(file_name, 'w') as f:
-        for read_name in index:
-            f.write(f"{read_name}\n")
+
+ga_variant_df_modified = ga_variant_df.copy()
+for col in ga_variant_df_modified.columns:
+    variant_type = het_variant_types[het_variant_pos.index(col)]
+#    if 'c' in variant_type and variant_type != 'ct':
+#        ga_variant_df_modified[col] = ga_variant_df_modified[col].replace({'T':'Y', 'C':'Y'})
+    if 'g' in variant_type and variant_type != 'ag':
+        ga_variant_df_modified[col] = ga_variant_df_modified[col].replace({'A':'R', 'G':'R'})
+    elif variant_type == 'ag':
+        ga_variant_df_modified[col] = np.nan
+
+ga_grouped = ga_variant_df_modified.groupby(het_variant_pos)
+ga_haplotype_indices = ga_grouped.groups
+ga_haplotype_counts = {key:len(ga_haplotype_indices[key]) for key in ga_haplotype_indices}
+
+ga_hap1, ga_hap2 = sorted(ga_haplotype_counts, key=ga_haplotype_counts.get, reverse=True)[:2]
+ga_hap1, ga_hap2 = list(ga_hap1), list(ga_hap2)
+print("Top GA haplotypes:", ga_hap1, ga_hap2)
+for h1,h2 in zip(ga_hap1, ga_hap2):
+    if h1 == h2 and not pd.isna(h1):
+        print("Conflict at position:", h1)
+        ga_hap1 = np.nan
+        ga_hap2 = np.nan
+ga_hap_labels = {tuple(ga_hap1):1, tuple(ga_hap2):2}
+
+
+
+for fiber in ct_bam.fetch(chrom, start, end):
+    pairs = fiber.get_aligned_pairs(with_seq=True)
+    fiber_sequence = fiber.query_sequence
+    fiber_bases = []
+    for query_idx, ref_idx, ref_base in pairs:
+        if ref_idx is not None and ref_idx in het_variant_pos:
+            if query_idx is not None:
+                fiber_bases.append(fiber_sequence[query_idx])
+            else:
+                fiber_bases.append(np.nan)
+    bases.append(fiber_bases)
+    read_names.append(fiber.query_name)
+
+ct_variant_df = pd.DataFrame(bases, index=read_names, columns=het_variant_pos)
+ct_variant_df_modified = ct_variant_df.copy()
+for col in ct_variant_df_modified.columns:
+    variant_type = het_variant_types[het_variant_pos.index(col)]
+    if 'c' in variant_type and variant_type != 'ct':
+        ct_variant_df_modified[col] = ct_variant_df_modified[col].replace({'T':'Y', 'C':'Y'})
+#    elif 'g' in variant_type and variant_type != 'ag':
+#        ct_variant_df_modified[col] = ct_variant_df_modified[col].replace({'A':'R', 'G':'R'})
+    elif variant_type == 'ct':
+        ct_variant_df_modified[col] = np.nan
+
+ct_grouped = ct_variant_df_modified.groupby(het_variant_pos)
+ct_haplotype_indices = ct_grouped.groups
+ct_haplotype_counts = {key:len(ct_haplotype_indices[key]) for key in ct_haplotype_indices}
+
+ct_hap1, ct_hap2 = sorted(ct_haplotype_counts, key=ct_haplotype_counts.get, reverse=True)[:2]
+ct_hap1, ct_hap2 = list(ct_hap1), list(ct_hap2)
+print("Top CT haplotypes:", ct_hap1, ct_hap2)
+for h1,h2 in zip(ct_hap1, ct_hap2):
+    if h1 == h2 and not pd.isna(h1):
+        print("Conflict at position:", h1)
+        ct_hap1 = np.nan
+        ct_hap2 = np.nan
+
+
+ct_hap_labels = {tuple(ct_hap1):3, tuple(ct_hap2):4}
+
+
+# Combine GA and CT haplotypes
+ga_hap1_corrected = ['G' if a == 'R' else a for a in ga_hap1]
+ga_hap2_corrected = ['G' if a == 'R' else a for a in ga_hap2]
+ct_hap1_corrected = ['C' if a == 'Y' else a for a in ct_hap1]
+ct_hap2_corrected = ['C' if a == 'Y' else a for a in ct_hap2]
+hap_match_scores = {'h11':sum((a==b) and not pd.isna(a) and not pd.isna(b) for a,b in zip(ga_hap1_corrected , ct_hap1_corrected)),
+                    'h12':sum((a==b) and not pd.isna(a) and not pd.isna(b) for a,b in zip(ga_hap1_corrected , ct_hap2_corrected))
+                    }
+
+if hap_match_scores['h11'] == 0 and hap_match_scores['h12'] == 0 or hap_match_scores['h11'] == hap_match_scores['h12']:
+    combined_haplotyping = False
+else:
+    combined_haplotyping = True
+    best_match = max(hap_match_scores, key=hap_match_scores.get)
+    if best_match == 'h11':
+        final_hap1 = [a if not pd.isna(a) else b for a,b in zip(ga_hap1_corrected , ct_hap1_corrected)]
+#        final_hap1 = ['C' if a == 'Y' else a for a in final_hap1]
+#        final_hap1 = ['G' if a == 'R' else a for a in final_hap1]
+        final_hap2 = [a if not pd.isna(a) else b for a,b in zip(ga_hap2_corrected , ct_hap2_corrected)]
+#        final_hap2 = ['C' if a == 'Y' else a for a in final_hap2]
+#        final_hap2 = ['G' if a == 'R' else a for a in final_hap2]
+        ct_hap_labels = {tuple(ct_hap1):1, tuple(ct_hap2):2}
+
+    else:
+        final_hap1 = [a if not pd.isna(a) else b for a,b in zip(ga_hap1_corrected, ct_hap2_corrected)]
+#        final_hap1 = ['C' if a == 'Y' else a for a in final_hap1]
+#        final_hap1 = ['G' if a == 'R' else a for a in final_hap1]
+        final_hap2 = [a if not pd.isna(a) else b for a,b in zip(ga_hap2_corrected, ct_hap1_corrected)]
+#        final_hap2 = ['C' if a == 'Y' else a for a in final_hap2]
+#        final_hap2 = ['G' if a == 'R' else a for a in final_hap2]
+        ct_hap_labels = {tuple(ct_hap1):2, tuple(ct_hap2):1}
+
+
+print("Variant positions:", het_variant_pos)
+print("Variant types:", het_variant_types)
+print("Final haplotypes:", final_hap1, final_hap2)
+
+
+# Write phased reads to new BAM file
+ga_hap1_ids = {item:ga_hap_labels[tuple(ga_hap1)] for item in ga_haplotype_indices[tuple(ga_hap1)]}
+ga_hap2_ids = {item:ga_hap_labels[tuple(ga_hap2)] for item in ga_haplotype_indices[tuple(ga_hap2)]}
+ct_hap1_ids = {item:ct_hap_labels[tuple(ct_hap1)] for item in ct_haplotype_indices[tuple(ct_hap1)]}
+ct_hap2_ids = {item:ct_hap_labels[tuple(ct_hap2)] for item in ct_haplotype_indices[tuple(ct_hap2)]}
+ga_haplotype_indices = {**ga_hap1_ids, **ga_hap2_ids}
+ct_haplotype_indices = {**ct_hap1_ids, **ct_hap2_ids}
+
+with pysam.AlignmentFile(output_bam_path, "wb", template=ct_bam) as out_bam:
+    for fiber in ga_bam.fetch(chrom, start, end):
+        if fiber.query_name in ga_haplotype_indices:
+            fiber.set_tag('HP', ga_haplotype_indices[fiber.query_name], value_type='i')
+        out_bam.write(fiber)
+    for fiber in ct_bam.fetch(chrom, start, end):
+        if fiber.query_name in ct_haplotype_indices:
+            fiber.set_tag('HP', ct_haplotype_indices[fiber.query_name], value_type='i')
+        out_bam.write(fiber)
+ct_bam.close()
+ga_bam.close()
+
+    
+
+
 
 
 #for key in het_variants:
@@ -206,9 +328,16 @@ for haplotype, index in haplotype_indices.items():
 
 
 
-
-
 '''
+
+filebase = "/mmfs1/gscratch/stergachislab/bohaczuk/scripts/DAF-QC-SMK/test_data/results/LHL4ZV_3_BRIP1-C5-F.fastq/LHL4ZV_3_BRIP1-C5-F.fastq/align"
+for haplotype, index in haplotype_indices.items():
+    file_name = f"{filebase}/" + "".join(map(str, haplotype)) + ".GAzids2.txt"
+    with open(file_name, 'w') as f:
+        for read_name in index:
+            f.write(f"{read_name}\n")
+
+
 
 #coordinates using pyft
 
