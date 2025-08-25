@@ -64,7 +64,7 @@ ga_basecounts = np.array(ga_bam.count_coverage(chrom, start, end))/ga_count
 #ct_basecounts = ct_basecounts/np.sum(ct_basecounts, axis=0, keepdims=True)
 #ga_basecounts = ga_basecounts/np.sum(ga_basecounts, axis=0, keepdims=True)
 
-# Identify and ignore reference match postions
+# Identify and ignore reference match postions. Use only CT or GA when ref base on opposite strand could be deaminated
 a_mask= (ct_basecounts[0] > threshold) & (ga_basecounts[0] > threshold) & (ref_matrix == 0)
 c_mask= (ga_basecounts[1] > threshold) & (ref_matrix == 1)
 g_mask= (ct_basecounts[2] > threshold) & (ref_matrix == 2)
