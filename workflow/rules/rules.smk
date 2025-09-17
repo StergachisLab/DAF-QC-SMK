@@ -11,6 +11,9 @@ rule deduplicate:
         dedup_bam="temp/{sm}/align/{sm}.reads.bam",
         dup_index="temp/{sm}/align/{sm}.reads.bam.bai",
         pb_index="temp/{sm}/align/{sm}.reads.bam.pbi",
+    resources:
+        mem_mb=20 * 1024,
+        runtime=1440,
     log:
         "logs/{sm}/dedup/{sm}.dedup.log",
     threads: 40
@@ -38,12 +41,16 @@ if PLATFORM == "pacbio":
             aligned_bam="results/{sm}/align/{sm}.mapped.{type}.bam",
             index="results/{sm}/align/{sm}.mapped.{type}.bam.bai",
         threads: 16
+        resources:
+            mem_mb=20 * 1024,
+            runtime=60 * 4,
         benchmark:
             "benchmark/{sm}.align_benchmark.{type}.txt"
         shell:
             """
             mkdir -p results/{wildcards.sm}/align && \
             minimap2 -t {threads} --MD --secondary=no -Y -y -a -x map-pb  {input.fa} <(samtools fastq -T "*" {input.data}) |\
+            rb add-rg -t 8 -u {input.data} |\
             samtools sort > {output.aligned_bam} && \
             samtools index {output.aligned_bam}
             """
@@ -60,6 +67,9 @@ elif PLATFORM == "ont":
             aligned_bam="results/{sm}/align/{sm}.mapped.reads.bam",
             index="results/{sm}/align/{sm}.mapped.reads.bam.bai",
         threads: 16
+        resources:
+            mem_mb=20 * 1024,
+            runtime=60 * 4,
         benchmark:
             "benchmark/{sm}.align_benchmark_ont.txt"
         shell:
@@ -122,6 +132,9 @@ rule sequence_qc:
         read_metrics="results/{sm}/qc/{type}/{sm}.detailed_seq_metrics.{type}.tbl.gz",
         summary_metrics="results/{sm}/qc/{type}/{sm}.summary_seq_metrics.{type}.tbl.gz",
     threads: 8
+    resources:
+        mem_mb=20 * 1024,
+        runtime=60 * 4,
     conda:
         "../envs/python.yaml"
     benchmark:
@@ -193,6 +206,9 @@ rule decorate_strands:
     output:
         decorated_bam="results/{sm}/align/{sm}.decorated.reads.bam",
     threads: 8
+    resources:
+        mem_mb=20 * 1024,
+        runtime=60 * 4,
     conda:
         "../envs/python.yaml"
     benchmark:
@@ -257,6 +273,9 @@ rule build_consensus:
     output:
         bam=temp("temp/{sm}/align/{sm}.consensus.bam"),
     threads: 8
+    resources:
+        mem_mb=20 * 1024,
+        runtime=60 * 4,
     conda:
         "../envs/python.yaml"
     benchmark:

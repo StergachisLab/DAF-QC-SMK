@@ -5,19 +5,23 @@ from collections import defaultdict
 
 def extract_du_seqs(pysam_file):
     reads = defaultdict(list)
+    readgroups = defaultdict(str)
     for read in pysam_file.fetch():
+        seq = read.query_sequence
+        rg = read.get_tag("RG") if read.has_tag("RG") else ""
         if read.has_tag("du"):
             du = read.get_tag("du")
-            seq = read.query_sequence
             reads[du].append(seq)
+            if rg and rg not in readgroups[du]:
+                readgroups[du] = rg
         else:
             # Default reads, those that give the du tag name, are not marked with the du tag, so this is necessary
             du = read.query_name
-            seq = read.query_sequence
             reads[du].insert(0, seq)
-#            reads[du].append(seq)
+            if rg and rg not in readgroups[du]:
+                readgroups[du] = rg
 
-    return reads
+    return reads, readgroups
 
 
 def abpoa_MSA(seq_list):
@@ -64,10 +68,11 @@ def collect_consensus(dup_dict, min_read_count=3):
     return dups_consensus
 
 
-def consensus_dfm_to_bam(dups_consensus, output_bam):
+def consensus_dfm_to_bam(dups_consensus, output_bam, rg_dict):
     for du, consensus_seq, dups_read_count in dups_consensus:
         read_name = f"{du}_consensus"
         zm_tag = int(du.split("/")[1])
+        rg = rg_dict[du] if du in rg_dict and len(rg_dict[du]) > 0 else None
 
         a = pysam.AlignedSegment()
         a.query_name = read_name
@@ -78,17 +83,19 @@ def consensus_dfm_to_bam(dups_consensus, output_bam):
         a.set_tag("zm", zm_tag)
         a.set_tag("YC", "240,187,201") # Colors reads, useful for visualization
         a.set_tag("dc", dups_read_count) # Duplication count
+        if rg:
+            a.set_tag("RG", rg)
 
         output_bam.write(a)
 
 
 def dedup_bam(pysam_file, output_bam, min_read_count=3):
     # First create a dfm from the input table to group reads by pbmarkdup du group tags
-    dup_dict = extract_du_seqs(pysam_file)
+    dup_dict, rg_dict = extract_du_seqs(pysam_file)
     # Use MSA to get consensus sequences (using default read numbers here)
     dups_consensus = collect_consensus(dup_dict, min_read_count=min_read_count)
     # Create an unaligned bam file from consensus sequences
-    consensus_dfm_to_bam(dups_consensus, output_bam)
+    consensus_dfm_to_bam(dups_consensus, output_bam, rg_dict)
 
 
 # Main script execution

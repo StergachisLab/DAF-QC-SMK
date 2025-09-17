@@ -45,15 +45,17 @@ for read in bam.fetch():
     read.query_sequence = new_seq
     read.query_qualities = quals
 
-    read.set_tags(
-        [
-#            ("da", deam_pos),
-#            ("fd", deam_pos[0] if deam_pos else 0, "i"),
-#            ("ld", deam_pos[-1] if deam_pos else 0, "i"),
-            ("st", strand),
-            ("MD", MD),
-        ]
-    )
+#    read.set_tags(
+#        [
+##            ("da", deam_pos),
+##            ("fd", deam_pos[0] if deam_pos else 0, "i"),
+##            ("ld", deam_pos[-1] if deam_pos else 0, "i"),
+#            ("st", strand),
+#            ("MD", MD),
+#        ]
+#    )
+    read.set_tag("st", strand)
+    read.set_tag("MD", MD)
     corrected_bam.write(read)
 corrected_bam.close()
 bam.close()
