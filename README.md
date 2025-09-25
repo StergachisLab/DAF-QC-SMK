@@ -40,7 +40,7 @@ And in place of `...` use all the normal Snakemake arguments for your workflow.
 
 ## Running the test case
 
-A provided dataset for testing can be downloaded and run with the following from the DAF-QC-SMK directory:
+A dataset, config file, and fasta sequence for human chr 8 (hg38) is provided for testing and can be downloaded and run with the following from the DAF-QC-SMK directory:
 
 ```bash
 pixi run test
