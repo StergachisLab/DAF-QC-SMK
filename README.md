@@ -38,6 +38,14 @@ where you update `/path/to/snakemake/pixi.toml` to the path of the `pixi.toml` y
 
 And in place of `...` use all the normal Snakemake arguments for your workflow.
 
+## Running the test case
+
+A provided dataset for testing can be downloaded and run with the following from the DAF-QC-SMK directory:
+
+```bash
+pixi run test
+```
+To better assist in troubleshooting, please make sure to run the test case if you are contacting us regarding errors.
 
 ## Inputs
 `config.tbl` Table that includes sample name, bam/FASTA path, and targeted regions. For compatibility with pbmarkdup, PacBio bam file inputs should be either unaligned or filtered for primary reads only if a consensus will be generated.
