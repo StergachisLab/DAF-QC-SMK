@@ -1,6 +1,10 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import matplotlib
+
+
+matplotlib.rcParams['pdf.fonttype'] = 42
 
 
 summary_path = snakemake.input.summary_metrics
@@ -95,14 +99,27 @@ else:
     y_limit = 0.1
     x_limit = 1
 
-    CT_deam_rates = region_df[region_df["strand"] == "CT"]["all_deam_rate"].tolist()[0]
-    GA_deam_rates = region_df[region_df["strand"] == "GA"]["all_deam_rate"].tolist()[0]
+    ct_rows = region_df[region_df["strand"] == "CT"]
+    if not ct_rows.empty:
+        CT_deam_rates = region_df[region_df["strand"] == "CT"]["all_deam_rate"].tolist()[0]
+        median_CT = np.median(CT_deam_rates)
+    else:
+        CT_deam_rates = []
+        median_CT = float('nan')
+    ga_rows = region_df[region_df["strand"] == "GA"]
+    if not ga_rows.empty:
+        GA_deam_rates = region_df[region_df["strand"] == "GA"]["all_deam_rate"].tolist()[0]
+        median_GA = np.median(GA_deam_rates)
+    else:
+        GA_deam_rates = []
+        median_GA = float('nan')
+
     all_deam_rates = CT_deam_rates + GA_deam_rates
 
     median_deamination = np.median(all_deam_rates)
     deamination_10 = np.percentile(all_deam_rates, 10)
     deamination_90 = np.percentile(all_deam_rates, 90)
-    median_CT = np.median(CT_deam_rates)
+    
     median_GA = np.median(GA_deam_rates)
 
     fig = plt.figure(figsize=(10, 6))

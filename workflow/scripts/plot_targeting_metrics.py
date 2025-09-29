@@ -1,5 +1,9 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+
+
+matplotlib.rcParams['pdf.fonttype'] = 42
 
 
 def calculate_metrics(metrics_path):

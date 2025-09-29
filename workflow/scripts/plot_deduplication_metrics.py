@@ -1,6 +1,10 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib
+
+
+matplotlib.rcParams['pdf.fonttype'] = 42
 
 
 def mark_cutoff(count, bins, y_limit):
@@ -84,72 +88,91 @@ else:
     # Plot duplicates by group, i.e. only duplicates group size > min cutoff are considered, and each group has equal weight
     dup_only = [x for x in du_values if x >= consensus_min_reads]
 
-    group_median_duplicates = np.median(dup_only) if dup_only else 0
-    group_duplicates_10 = np.percentile(dup_only, 10) if dup_only else 0
-    group_duplicates_90 = np.percentile(dup_only, 90) if dup_only else 0
-
-    x_limit = 500
-    y_limit = 0.5
-    dup_only = [x if x <= x_limit else x_limit for x in dup_only]
-
-    fig = plt.figure(figsize=(10, 6))
-    weights = [1 / len(dup_only)] * len(dup_only)
-    bin_specs = range(0, x_limit + 1, 4)  # create consistent bin widths
-    counts, bins, patches = plt.hist(
-        dup_only, bins=bin_specs, color="blue", alpha=0.7, weights=weights
-    )
-    plt.xlim(consensus_min_reads, x_limit)
-    plt.ylim(0, y_limit)
-
-    # Draw red line above histogram if bin exceeds y axis limit
-    mark_cutoff(counts, bins, y_limit)
-
-    plt.axvline(
-        group_median_duplicates,
-        color="black",
-        linestyle="dashed",
-        linewidth=1,
-        label=f"Median: {group_median_duplicates:.2f}",
-    )
-    plt.axvline(
-        group_duplicates_10,
-        color="black",
-        linestyle="dashed",
-        linewidth=1,
-        label=f"10th Percentile: {group_duplicates_10:.2f}",
-    )
-    plt.axvline(
-        group_duplicates_90,
-        color="black",
-        linestyle="dashed",
-        linewidth=1,
-        label=f"90th Percentile: {group_duplicates_90:.2f}",
-    )
-
-    # Add text labels
-    plt.text(
-        group_median_duplicates, y_limit + y_limit / 80, "50%", rotation=90, va="bottom"
-    )
-    plt.text(
-        group_duplicates_10, y_limit + y_limit / 80, "10%", rotation=90, va="bottom"
-    )
-    plt.text(
-        group_duplicates_90, y_limit + y_limit / 80, "90%", rotation=90, va="bottom"
-    )
-    
-    plt.title(f"Duplicate groups ≥ {consensus_min_reads}, {label}")
-    plt.xlabel("Duplicate Counts")
-    plt.ylabel("Proportion of groups")
-    plt.savefig(output_groups, format="pdf")
-#    plt.show()
-
-    with open(output_table, "w") as f:
-        f.write(
-            f"Median duplicates per group: {group_median_duplicates:.2f}\n"
-            f"10th Percentile duplicates per group: {group_duplicates_10:.2f}\n"
-            f"90th Percentile duplicates per group: {group_duplicates_90:.2f}\n"
-            f"Reads in groups of {consensus_min_reads}+ duplicates: {pass_threshold} ({perc_dups_threshold:.2f}%)\n"
-            f"Reads in groups of < {consensus_min_reads} duplicates: {total_reads - pass_threshold} ({100 - perc_dups_threshold:.2f}%)\n"
+    if len(dup_only) == 0:
+        print(f"No duplicate groups found with size >= {consensus_min_reads}. Skipping plots.")
+        plt.figure(figsize=(10, 6))
+        plt.text(
+            0.5,
+            0.5,
+            f"No duplicate groups with size >= {consensus_min_reads}",
+            fontsize=12,
+            ha="center",
+            va="center",
         )
+        plt.axis("off")
+        plt.tight_layout()
+        plt.savefig(output_groups, format="pdf")
+        with open(output_table, "w") as f:
+            f.write("")
+
+    else:
+
+        group_median_duplicates = np.median(dup_only) if dup_only else 0
+        group_duplicates_10 = np.percentile(dup_only, 10) if dup_only else 0
+        group_duplicates_90 = np.percentile(dup_only, 90) if dup_only else 0
+
+        x_limit = 500
+        y_limit = 0.5
+        dup_only = [x if x <= x_limit else x_limit for x in dup_only]
+
+        fig = plt.figure(figsize=(10, 6))
+        weights = [1 / len(dup_only)] * len(dup_only)
+        bin_specs = range(0, x_limit + 1, 4)  # create consistent bin widths
+        counts, bins, patches = plt.hist(
+            dup_only, bins=bin_specs, color="blue", alpha=0.7, weights=weights
+        )
+        plt.xlim(consensus_min_reads, x_limit)
+        plt.ylim(0, y_limit)
+
+        # Draw red line above histogram if bin exceeds y axis limit
+        mark_cutoff(counts, bins, y_limit)
+
+        plt.axvline(
+            group_median_duplicates,
+            color="black",
+            linestyle="dashed",
+            linewidth=1,
+            label=f"Median: {group_median_duplicates:.2f}",
+        )
+        plt.axvline(
+            group_duplicates_10,
+            color="black",
+            linestyle="dashed",
+            linewidth=1,
+            label=f"10th Percentile: {group_duplicates_10:.2f}",
+        )
+        plt.axvline(
+            group_duplicates_90,
+            color="black",
+            linestyle="dashed",
+            linewidth=1,
+            label=f"90th Percentile: {group_duplicates_90:.2f}",
+        )
+
+        # Add text labels
+        plt.text(
+            group_median_duplicates, y_limit + y_limit / 80, "50%", rotation=90, va="bottom"
+        )
+        plt.text(
+            group_duplicates_10, y_limit + y_limit / 80, "10%", rotation=90, va="bottom"
+        )
+        plt.text(
+            group_duplicates_90, y_limit + y_limit / 80, "90%", rotation=90, va="bottom"
+        )
+        
+        plt.title(f"Duplicate groups ≥ {consensus_min_reads}, {label}")
+        plt.xlabel("Duplicate Counts")
+        plt.ylabel("Proportion of groups")
+        plt.savefig(output_groups, format="pdf")
+    #    plt.show()
+
+        with open(output_table, "w") as f:
+            f.write(
+                f"Median duplicates per group: {group_median_duplicates:.2f}\n"
+                f"10th Percentile duplicates per group: {group_duplicates_10:.2f}\n"
+                f"90th Percentile duplicates per group: {group_duplicates_90:.2f}\n"
+                f"Reads in groups of {consensus_min_reads}+ duplicates: {pass_threshold} ({perc_dups_threshold:.2f}%)\n"
+                f"Reads in groups of < {consensus_min_reads} duplicates: {total_reads - pass_threshold} ({100 - perc_dups_threshold:.2f}%)\n"
+            )
 
 
