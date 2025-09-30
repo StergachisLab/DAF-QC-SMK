@@ -19,6 +19,7 @@ CONSENSUS_MIN_READS = get_consensus_min_reads()
 MIN_DEAMINATION_COUNT = get_min_deamination_count()
 END_TOLERANCE = get_end_tolerance()
 DECORATED_SAMPLESIZE = get_decorated_samplesize()
+BENCHMARK = get_benchmark()
 
 
 include: "rules/rules.smk"

@@ -38,6 +38,13 @@ where you update `/path/to/snakemake/pixi.toml` to the path of the `pixi.toml` y
 
 And in place of `...` use all the normal Snakemake arguments for your workflow.
 
+
+To run on a SLURM cluster, you will need to create and specify a profile. See Snakemake's documentation for instructions. UW Hyak users can use the provided profile in `profiles/slurm-executor/`. You can then run with:
+
+```bash
+pixi run snakemake --configfile config/config.yaml --profile profiles/slurm-executor
+```
+
 ## Running the test case
 
 A dataset, config file, and fasta sequence for human chr 8 (hg38) is provided for testing and can be downloaded and run with the following from the DAF-QC-SMK directory:
@@ -67,6 +74,7 @@ chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a
 min_deamination_count: 50 # minimum number of deaminations for top/bottom strand designation
 end_tolerance: 30 # +/- end length tolerance (in bp) for classifying full-length reads
 decorated_samplesize: 5000 # Approximate number of reads to output as decorated reads bam for visualization
+benchmark: False # Whether to save benchmarking for run time and memory usage. Default is False.
 
 # PacBio-specific options. Input should always be bam files.
 dup_end_length: 0 # length to consider for deduplication. 0 will consider the whole read.
@@ -85,7 +93,7 @@ is_fastq: False # for ONT files only, specifies whether the input files are fast
 
 `results/{sample_name}/align/{sample_name}.decorated.bam` bam containing full-length reads designated top/bottom with C->T as Y(top strand) and G->A as R (bottom strand). Strand designation is stored in the `st` tag. If `decorated_samplesize` is specified in the config file, this will contain a randomly selected sample of full length, top/bottom strand reads.
 
-`results/{sample_name}/align/{sample_name}.mapped.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are `pbmarkdup` `du` tags with "_consensus" appended. The `du` tag is also included. The `zm` tag is arbitrarily set to that of the `du` tag name. The `dc` tag indicates the number of reads that were used to construct the consensus. For visualization, the `YC` tag colors consensus reads pink.
+`results/{sample_name}/align/{sample_name}.mapped.consensus.bam` bam containing MSA consensus of full length, top/bottom reads with a minimum number of reads specified by dups_required (default:3). Consensus read names are `pbmarkdup` `du` tags with "_consensus" appended. The `du` tag is also included. The `zm` tag is arbitrarily set to that of the `du` tag name. The `dc` tag indicates the number of reads that were used to construct the consensus. For visualization, the `YC` tag colors consensus reads pink. For `consensus_min_reads` that include values <3, the consensus for groups with 2 reads will be one of the reads in the duplicate group, typically the pbmarkdup representative (`du` tag read name), and the consensus for groups with 1 read will be that read. Note that `consensus_min_reads` <3 is not recommended for most applications as it may lead to an over-representation of poorly sequenced reads.
 
 
 ### Data files

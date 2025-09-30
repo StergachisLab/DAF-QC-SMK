@@ -167,3 +167,11 @@ def get_qc_plot_names(wc):
             )
 
     return plots
+
+
+def get_benchmark():
+    if "benchmark" not in config:
+        benchmark = False
+    else:
+        benchmark = config["benchmark"]
+    return benchmark

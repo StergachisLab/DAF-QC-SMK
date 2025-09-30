@@ -9,6 +9,7 @@ chimera_cutoff: 0.9 # minimum fraction of (C->T|G->A)/(C->T+G->A) required for a
 min_deamination_count: 50 # minimum number of deaminations for top/bottom strand designation
 end_tolerance: 30 # +/- end length tolerance (in bp) for classifying full-length reads
 decorated_samplesize: 5000 # Approximate number of reads to output as decorated reads bam for visualization
+benchmark: False # Whether to save benchmarking for run time and memory usage. Default is False.
 
 
 # PacBio-specific options. Input should always be bam files.

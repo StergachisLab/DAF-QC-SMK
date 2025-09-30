@@ -18,7 +18,7 @@ rule deduplicate:
         "logs/{sm}/dedup/{sm}.dedup.log",
     threads: 40
     benchmark:
-        "benchmark/{sm}.dedup_benchmark.txt"
+        repeat("benchmark/{sm}.dedup_benchmark.txt", 1 if BENCHMARK else 0)
     shell:
         """
         mkdir -p temp/{wildcards.sm}/align logs/{wildcards.sm}/dedup && \
@@ -45,7 +45,7 @@ if PLATFORM == "pacbio":
             mem_mb=20 * 1024,
             runtime=60 * 4,
         benchmark:
-            "benchmark/{sm}.align_benchmark.{type}.txt"
+            repeat("benchmark/{sm}.align_benchmark.{type}.txt", 1 if BENCHMARK else 0)
         shell:
             """
             mkdir -p results/{wildcards.sm}/align && \
@@ -71,7 +71,7 @@ elif PLATFORM == "ont":
             mem_mb=20 * 1024,
             runtime=60 * 4,
         benchmark:
-            "benchmark/{sm}.align_benchmark_ont.txt"
+            repeat("benchmark/{sm}.align_benchmark_ont.txt", 1 if BENCHMARK else 0)
         shell:
             """
             mkdir -p results/{wildcards.sm}/align && \
@@ -97,7 +97,7 @@ rule targeting_qc:
         summary="results/{sm}/qc/reads/{sm}.summary_targeting_metrics.tbl",
     threads: 8
     benchmark:
-        "benchmark/{sm}.targetqc_benchmark.txt"
+        repeat("benchmark/{sm}.targetqc_benchmark.txt", 1 if BENCHMARK else 0)
     conda:
         "../envs/python.yaml"
     script:
@@ -113,7 +113,7 @@ rule plot_targeting_qc:
         plot="results/{sm}/qc/reads/plots/{sm}.targeting_plot.pdf",
         metrics_txt="results/{sm}/qc/reads/plots/{sm}.targeting_plot.txt",
     benchmark:
-        "benchmark/{sm}.targetplot_benchmark.txt"
+        repeat("benchmark/{sm}.targetplot_benchmark.txt", 1 if BENCHMARK else 0)
     conda:
         "../envs/python.yaml"
     script:
@@ -138,7 +138,7 @@ rule sequence_qc:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.seqqc_benchmark.{type}.txt"
+        repeat("benchmark/{sm}.seqqc_benchmark.{type}.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/sequence_metrics.py"
 
@@ -159,7 +159,7 @@ rule plot_seq_qc:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.seqplot_benchmark.{type}.{region}.txt"
+        repeat("benchmark/{sm}.seqplot_benchmark.{type}.{region}.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/plot_sequence_metrics.py"
 
@@ -179,7 +179,7 @@ rule filter_bam:
     conda:
         "../envs/cmd.yaml"
     benchmark:
-        "benchmark/{sm}.filterbam_benchmark.txt"
+        repeat("benchmark/{sm}.filterbam_benchmark.txt", 1 if BENCHMARK else 0)
     shell:
         """
         samtools view -@ {threads} -F 2306 -b -N <(zcat {input.seq_metrics} | awk -F'\t' '$8=="CT" || $8=="GA" {{print $1}}') {input.bam} > {output.filtered_bam}
@@ -212,7 +212,7 @@ rule decorate_strands:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.decorate_benchmark.txt"
+        repeat("benchmark/{sm}.decorate_benchmark.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/decorate_strands.py"
 
@@ -242,7 +242,7 @@ rule deduplication_metrics:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.dedupqc_benchmark.txt"
+        repeat("benchmark/{sm}.dedupqc_benchmark.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/deduplication_metrics.py"
 
@@ -259,7 +259,7 @@ rule plot_deduplication_metrics:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.dedupplot_benchmark.{region}.txt"
+        repeat("benchmark/{sm}.dedupplot_benchmark.{region}.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/plot_deduplication_metrics.py"
 
@@ -279,7 +279,7 @@ rule build_consensus:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.consensus_benchmark.txt"
+        repeat("benchmark/{sm}.consensus_benchmark.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/build_consensus.py"
 
@@ -295,6 +295,6 @@ rule make_dashboard:
     conda:
         "../envs/python.yaml"
     benchmark:
-        "benchmark/{sm}.dashboard_benchmark.txt"
+        repeat("benchmark/{sm}.dashboard_benchmark.txt", 1 if BENCHMARK else 0)
     script:
         "../scripts/create_dashboard.py"
