@@ -169,3 +169,11 @@ for column in ["full_length_reads", "non_full_length_reads", "non_primary_reads"
 
 table.to_csv(output_detailed, sep="\t", index=False, compression="gzip")
 aggregate_table.to_csv(output_summary, sep="\t", index=False)
+
+# If user desires output anyway, run snakemake with --keep-incomplete
+if aggregate_table["#_full_length_reads"].sum() == 0:
+    raise ValueError(
+        f"No full length reads found in targeting metrics file, {total_fibers} fibers evaluated. \n"
+        "Check that the correct targeted regions are specified in your manifest table.\n"
+        "Set end_tolerance to a larger value in your config file if the regions are not exact matches to the BAM file."
+    )

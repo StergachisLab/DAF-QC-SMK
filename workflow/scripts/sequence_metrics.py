@@ -183,6 +183,11 @@ def strand_metrics_table(
                     if doublets[key][0] > 0
                     else None
                 )
+        else:
+            for key in keys:
+                read_data[f"{key}_count"] = None
+                read_data[f"{key}_deam"] = None
+                read_data[f"{key}_deam_rate"] = None
 
         read_collector.append(read_data)
 
@@ -318,3 +323,12 @@ aggregate_table = aggregate_strand_metrics(table)
 
 table.to_csv(read_metrics, sep="\t", index=False, compression="gzip")
 aggregate_table.to_csv(summary_metrics, sep="\t", index=False, compression="gzip")
+
+# Check that there are CT or GA reads detected
+CT_GA_count = aggregate_table[aggregate_table["strand"].isin(["CT", "GA"])]["count"].sum()
+if CT_GA_count == 0:
+    raise ValueError(
+        "No CT or GA strand reads found in strand metrics file. \n"
+        "If you increased the chimera cutoff or minimum deamination count, consider using defaults. \n"
+        "Otherwise, check sample for targeting and DddA activity."
+    )
