@@ -1,4 +1,4 @@
-[project]
+[workspace]
 authors = ["Stephanie Bohaczuk <stephanie.bohaczuk@gmail.com>"]
 channels = ["conda-forge", "bioconda"]
 description = "QC pipeline for DAF-seq. Template from Mitchell Vollger"
