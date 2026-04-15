@@ -1,9 +1,9 @@
 def get_ref():
     if "ref" not in config:
-        raise ValueError("FIRE: ref parameter is missing in config.yaml")
+        raise ValueError("ref parameter is missing in config.yaml")
     ref = config["ref"]
     if not os.path.exists(ref):
-        raise ValueError(f"FIRE: reference file {ref} does not exist")
+        raise ValueError(f"reference file {ref} does not exist")
     return os.path.abspath(ref)
 
 
@@ -28,10 +28,10 @@ def get_dup_end_length():
 
 
 def get_min_id_perc():
-    if "min_id_perc" not in config:
+    if "dup_min_id_perc" not in config:
         min_id_perc = 99.2
     else:
-        min_id_perc = config["min_id_perc"]
+        min_id_perc = config["dup_min_id_perc"]
     return min_id_perc
 
 
